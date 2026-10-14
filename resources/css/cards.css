@@ -1,0 +1,147 @@
+/* Shared card vocabulary: warm color plates, charcoal bodies and inset details. */
+:is(.admin-app, .staff-app, .member-app) {
+    --card-shell: #080809;
+    --card-body: #202023;
+    --card-edge: rgba(255, 255, 255, .12);
+    --card-accent: linear-gradient(125deg, #ffbc72, #ff812f 58%, #d65a18);
+    --card-gold: linear-gradient(125deg, #f3d9a2, #dca857 65%, #b98539);
+}
+
+/* Data tables keep their full rectangular content and horizontal scrolling. */
+:is(.admin-app, .staff-app) main .panel,
+.member-app .m-surface {
+    border: 1px solid var(--card-edge);
+    border-radius: 28px;
+    background: linear-gradient(145deg, #242427, #171719);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 12px 28px rgba(0,0,0,.16);
+}
+:is(.admin-app, .staff-app) .panel-heading {
+    border-radius: 27px 27px 0 0;
+    background: linear-gradient(110deg, rgba(239,175,91,.1), rgba(255,255,255,.015));
+    padding-block: 24px;
+}
+:is(.admin-app, .staff-app) .panel thead { background: rgba(255,255,255,.035); }
+:is(.admin-app, .staff-app) .info-card,
+.admin-app .owner-followup {
+    border-radius: 28px;
+    border: 1px solid rgba(223,171,99,.3);
+    background: radial-gradient(ellipse at 100% 0, rgba(221,153,67,.16), transparent 65%), #1c1a17;
+    box-shadow: inset 0 1px 0 rgba(255,224,174,.07);
+}
+
+/* A color plate sits behind a sloped charcoal body, like the reference cards. */
+.admin-app .kpi {
+    padding: 22px;
+    border: 6px solid var(--card-shell);
+    border-radius: 30px;
+    background: var(--card-gold);
+    min-height: 230px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 12px 24px rgba(0,0,0,.18);
+}
+.admin-app .kpi::before {
+    content: '';
+    position: absolute;
+    inset: 65px 0 0;
+    background: linear-gradient(135deg, #262629, #171719);
+    clip-path: polygon(0 0, 42% 0, 53% 22px, 100% 22px, 100% 100%, 0 100%);
+    pointer-events: none;
+    z-index: -1;
+}
+.admin-app .kpi:nth-child(3) { background: var(--card-accent); border-color: var(--card-shell); box-shadow: 0 0 0 1px rgba(255,154,69,.28), 0 12px 24px rgba(0,0,0,.18); }
+.admin-app .kpi:nth-child(3)::before { background: linear-gradient(135deg, #292321, #181718); }
+.admin-app .kpi .kpi-label { color: #251c12; font-weight: 600; font-size: 14px; min-height: 38px; }
+.admin-app .kpi .kpi-icon { width: 36px; height: 36px; border-radius: 50%; color: #251c12; background: rgba(255,255,255,.2); border-color: rgba(47,31,15,.17); }
+.admin-app .kpi > strong, .admin-app .kpi:nth-child(3) > strong { color: #f8f5ef; font-size: clamp(30px,2.5vw,42px); margin: 38px 0 14px; font-weight: 500; letter-spacing: -1.2px; }
+.admin-app .kpi > small, .admin-app .kpi:nth-child(3) > small { color: #c1bcb3; font-size: 12px; border-color: rgba(255,255,255,.1); }
+
+.admin-app .owner-shortcuts > a {
+    border: 5px solid var(--card-shell);
+    border-radius: 28px;
+    background: linear-gradient(125deg,#2d2925,#1b1b1e);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.11), inset 0 1px 0 rgba(255,255,255,.04);
+    padding: 20px;
+}
+.admin-app .owner-shortcuts .owner-icon { background: var(--card-accent); color: #281608; border: 0; border-radius: 14px; }
+.admin-app .owner-shortcuts > a > svg { background: #0d0d0e; border-color: rgba(255,255,255,.15); }
+.admin-app .owner-welcome { border: 6px solid var(--card-shell); border-radius: 32px; box-shadow: 0 0 0 1px rgba(232,174,99,.28); }
+.admin-app .owner-welcome::before { background: linear-gradient(90deg,rgba(9,9,10,.93),rgba(9,9,10,.18)); }
+.admin-app .owner-followup > a:not(.owner-audit-link) { border-radius: 18px; background: rgba(5,5,6,.35); padding: 18px; margin-top: 12px; border: 1px solid rgba(255,255,255,.075); }
+
+/* Packages share the stepped color header; no content or form controls are clipped. */
+:is(.admin-app, .staff-app) main .plan-card,
+.member-app .m-plan {
+    position: relative;
+    isolation: isolate;
+    border: 6px solid var(--card-shell);
+    border-radius: 30px;
+    background: linear-gradient(135deg,#262629,#18181a);
+    padding: 26px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.11);
+}
+:is(.admin-app, .staff-app) .plan-card::before,
+.member-app .m-plan::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 88px;
+    border-radius: 23px 23px 0 0;
+    background: var(--card-accent);
+    clip-path: polygon(0 0,100% 0,100% 58%,66% 58%,54% 100%,0 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+:is(.admin-app, .staff-app) .plan-card > .eyebrow { color: #281608; font-weight: 700; display: block; margin-bottom: 44px; }
+.member-app .m-plan-top { color: #281608; margin-bottom: 46px; }
+.member-app .m-plan-top > span { color: #281608; background: rgba(255,255,255,.2); border: 1px solid rgba(40,22,8,.14); }
+.member-app .m-plan-price { font-size: 30px; color: #f6d5a0; }
+:is(.admin-app,.staff-app) .plan-price { color: #f6d5a0; }
+.member-app .m-plan form { margin-top: auto; padding-top: 20px; }
+.member-app .m-plan .button { border-radius: 999px; background: #0b0b0c; border-color: rgba(255,255,255,.2); }
+
+/* Member summaries use separate inset tiles rather than one flat statistics strip. */
+.member-app .m-stat-grid { background: transparent; border: 0; border-radius: 0; gap: 12px; overflow: visible; }
+.member-app .m-stat { border: 1px solid var(--card-edge); border-radius: 22px; background: linear-gradient(145deg,#28272a,#171719); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+.member-app .m-stat > strong { font-size: 32px; color: #f0cc91; }
+.member-app .m-stat > small { color: #c1bcb4; }
+.member-app .m-invoice-card { border-radius: 24px; border-color: rgba(255,255,255,.14); background: linear-gradient(140deg,#262629,#161618); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+.member-app .m-icon-tile { background: linear-gradient(135deg,rgba(255,151,53,.2),rgba(255,151,53,.055)); border: 1px solid rgba(255,173,95,.16); border-radius: 14px; }
+
+@media (hover: hover) {
+    .admin-app .owner-shortcuts > a:hover { border-color: #100e0b; background: linear-gradient(125deg,#3a2d20,#211c17); box-shadow: 0 0 0 1px rgba(230,171,94,.42); }
+}
+@media (max-width: 639px) {
+    :is(.admin-app,.staff-app) main .panel,.member-app .m-surface { border-radius: 22px; }
+    :is(.admin-app,.staff-app) .panel-heading { border-radius: 21px 21px 0 0; }
+    .admin-app .kpi { padding: 17px; border-width: 4px; border-radius: 24px; min-height: 218px; }
+    .admin-app .kpi .kpi-label { font-size: 12px; }
+    .admin-app .kpi > strong { font-size: 30px; }
+    .admin-app .owner-shortcuts > a { border-width: 4px; border-radius: 23px; padding: 15px; }
+    :is(.admin-app,.staff-app) main .plan-card,.member-app .m-plan { border-radius: 25px; border-width: 4px; padding: 22px; }
+    .member-app .m-stat-grid { gap: 8px; }
+    .member-app .m-stat { padding: 17px 14px; border-radius: 18px; }
+}
+@media print {
+    :is(.admin-app,.staff-app) main .panel,.member-app .m-surface { background: white; box-shadow: none; border-color: #ccc; }
+}
+
+.member-app .m-pass {
+    isolation: isolate; border: 6px solid var(--card-shell); border-radius: 32px;
+    background: var(--card-gold); box-shadow: 0 0 0 1px rgba(241,196,126,.24);
+}
+.member-app .m-pass::before {
+    content: ''; position: absolute; inset: 72px 0 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(130deg,#262323,#141416);
+    clip-path: polygon(0 0,46% 0,58% 25px,100% 25px,100% 100%,0 100%);
+}
+.member-app .m-pass::after { display: none; }
+.member-app .m-pass-top > span { color: #332311; font-weight: 600; }
+.member-app .m-pass-divider { color: #72532c; }
+.member-app .m-pass-number { color: #cbc3b8; }
+.member-app .m-pass-emblem { color: rgba(233,185,115,.22); }
+.member-app .m-balance-card { border: 6px solid var(--card-shell); border-radius: 30px; background: var(--card-accent); box-shadow: 0 0 0 1px rgba(255,174,87,.24); }
+.member-app .m-balance-card .m-kicker,.member-app .m-balance-card > strong,.member-app .m-balance-card p { color: #291609; }
+.member-app .m-paid-card { border: 1px solid var(--card-edge); border-radius: 28px; background: linear-gradient(145deg,#252528,#161618); }
+@media (max-width: 639px) { .member-app .m-pass { border-width: 4px; border-radius: 26px; } .member-app .m-pass-top > span { font-size: 8px; } }

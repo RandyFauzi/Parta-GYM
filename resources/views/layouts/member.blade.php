@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#080809">
     <title>@yield('title', 'Beranda') · Parta GYM</title>
-    @vite(['resources/css/app.css', 'resources/css/member.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/member.css', 'resources/css/cards.css','resources/js/app.js'])
 </head>
 <body class="member-theme member-app">
 @php
