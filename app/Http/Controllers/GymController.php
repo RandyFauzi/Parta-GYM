@@ -92,13 +92,22 @@ class GymController extends Controller
             $data = $r->validated();
             $member = Member::create(['full_name' => $data['full_name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'member_number' => 'PG-'.strtoupper(Str::random(8))]);
             if ($r->filled('plan_id')) {
-                $this->service->createInvoice($member, MembershipPlan::findOrFail($data['plan_id']), $data['request_key']);
-            } $this->service->audit('member.created', $member->id);
+                $invoice = $this->service->createInvoice($member, MembershipPlan::findOrFail($data['plan_id']), $data['request_key']);
+                if (($data['payment_status'] ?? 'pending') === 'paid') {
+                    $this->service->settle($invoice, $r->user(), $data['method'], $data['reference'] ?? null);
+                }
+            }
+            if ($r->boolean('create_account')) {
+                $user = User::create(['name' => $member->full_name, 'email' => $data['email'], 'password' => $data['password']]);
+                $member->update(['user_id' => $user->id]);
+                $this->service->audit('member.account_linked', $member->id);
+            }
+            $this->service->audit('member.created', $member->id);
 
             return $member;
         });
 
-        return redirect()->route('members.show', $member)->with('success', 'Anggota terdaftar. Konfirmasi pembayaran untuk mengaktifkan paket.');
+        return redirect()->route('members.show', $member)->with('success', $r->input('payment_status') === 'paid' ? 'Anggota terdaftar, pembayaran tercatat, dan membership aktif.' : 'Anggota terdaftar. Konfirmasi pembayaran untuk mengaktifkan paket.');
     }
 
     public function member(Member $member): View
@@ -124,12 +133,12 @@ class GymController extends Controller
 
     public function payments(): View
     {
-        return view('gym.payments', ['invoices' => Invoice::with('member')->latest()->paginate(15)]);
+        return view('gym.payments', ['invoices' => Invoice::with('member', 'payment')->latest()->paginate(15)]);
     }
 
     public function pay(Request $r, Invoice $invoice): RedirectResponse
     {
-        $data = $r->validate(['method' => 'required|in:cash,bank_transfer', 'reference' => 'nullable|required_if:method,bank_transfer|string|max:120', 'confirmed' => 'required|accepted']);
+        $data = $r->validate(['method' => 'required|in:cash,bank_transfer,qris,card,other', 'reference' => 'nullable|required_if:method,bank_transfer,other|string|max:120', 'confirmed' => 'required|accepted']);
         $this->service->settle($invoice, $r->user(), $data['method'], $data['reference'] ?? null);
 
         return back()->with('success', 'Pembayaran dikonfirmasi dan masa keanggotaan diaktifkan.');

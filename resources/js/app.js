@@ -59,3 +59,28 @@ if (workspaceMore) {
  document.addEventListener('keydown', event => { if (event.key === 'Escape' && workspaceMore.open) { workspaceMore.open = false; workspaceMore.querySelector('summary').focus(); } });
  window.matchMedia('(min-width: 640px)').addEventListener('change', event => { if (event.matches) workspaceMore.open = false; });
 }
+
+const registration = document.querySelector('[data-quick-registration]');
+if (registration) {
+ const plan = registration.querySelector('[name="plan_id"]');
+ const status = registration.querySelector('[name="payment_status"]');
+ const payment = registration.querySelector('[data-registration-payment]');
+ const account = registration.querySelector('[name="create_account"]');
+ const accountFields = registration.querySelector('[data-account-fields]');
+ const syncRegistration = () => {
+  const paid = status.value === 'paid';
+  payment.hidden = !paid;
+  payment.disabled = !paid;
+  payment.querySelector('[name="confirmed"]').required = paid;
+  plan.required = paid;
+  accountFields.hidden = !account.checked;
+  accountFields.querySelector('input').disabled = !account.checked;
+  accountFields.querySelector('input').required = account.checked;
+  registration.querySelector('[name="email"]').required = account.checked;
+  const price = Number(plan.selectedOptions[0]?.dataset.price || 0);
+  document.querySelector('[data-registration-total]').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(price);
+  document.querySelector('[data-registration-note]').textContent = paid ? 'Pembayaran tercatat dan membership langsung aktif setelah disimpan.' : 'Anggota tersimpan. Membership aktif setelah pembayaran dikonfirmasi tim.';
+ };
+ registration.addEventListener('change', syncRegistration);
+ syncRegistration();
+}
