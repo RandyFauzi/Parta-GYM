@@ -13,7 +13,6 @@
     <div class="login-shade" aria-hidden="true"></div>
     <header class="login-masthead">
         <a href="{{ route('login') }}" aria-label="Parta GYM"><img class="parta-logo" src="{{ asset('images/Logos/Logo Parta GYM (putih).webp') }}" alt="Parta GYM" width="1361" height="413" decoding="async"></a>
-        <span>LATIHAN HARI INI. PROGRES ESOK HARI.</span>
     </header>
     <main class="login-stage">
         <section class="login-message" aria-labelledby="login-headline">
@@ -29,6 +28,6 @@
             </div>
         </section>
     </main>
-    <footer class="login-bottom">{{ config('gym.name') }} <span>KONSISTENSI MEMBENTUK KEKUATAN.</span></footer>
+    <footer class="login-bottom">{{ config('gym.name') }} </footer>
 </body>
 </html>

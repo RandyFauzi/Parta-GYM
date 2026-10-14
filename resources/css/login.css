@@ -24,3 +24,49 @@
 @media (min-width: 1800px) { .login-backdrop { object-position: center 48%; } }
 @media (max-width: 900px) { .login-stage { gap: 30px; grid-template-columns: minmax(0,1fr) minmax(320px,380px); } .login-card { padding: 28px; } .login-message h1 { font-size: 48px; } .login-masthead > span { font-size: 8px; letter-spacing: 1px; } }
 @media (max-width: 639px) { .login-masthead { padding: 24px; } .login-masthead .parta-logo { width: 130px; } .login-masthead > span { display: none; } .login-stage { display: flex; flex-direction: column; align-items: stretch; gap: 32px; padding: 20px 24px 32px; min-height: auto; } .login-message h1 { font-size: clamp(42px,11vw,62px); margin: 18px 0; } .login-message p { font-size: 13px; } .login-message-foot { display: none; } .login-card { padding: 26px 22px; border-radius: 20px; } .login-card h2 { font-size: 25px; } .login-bottom { padding: 0 24px 24px; font-size: 8px; letter-spacing: 1px; } .login-bottom > span { text-align: right; } .login-backdrop { object-position: 60% center; } }
+
+/* A single glass surface with static highlights keeps the effect inexpensive. */
+.login-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 32px;
+    background: linear-gradient(155deg,rgba(27,28,30,.94),rgba(12,13,15,.96)) padding-box,
+        linear-gradient(145deg,rgba(244,194,128,.65),rgba(255,255,255,.3) 28%,rgba(255,255,255,.06) 65%) border-box;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06),0 28px 70px rgba(0,0,0,.35);
+    animation: login-card-arrive 420ms ease-out both;
+}
+@supports (backdrop-filter: blur(12px)) {
+    .login-card { background: linear-gradient(155deg,rgba(27,28,30,.8),rgba(12,13,15,.88)) padding-box,
+        linear-gradient(145deg,rgba(244,194,128,.65),rgba(255,255,255,.3) 28%,rgba(255,255,255,.06) 65%) border-box; }
+}
+.login-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 180px 150px at 0 0,rgba(255,137,45,.3),transparent 72%),
+        linear-gradient(125deg,transparent 42%,rgba(255,255,255,.05) 54%,transparent 66%);
+}
+.login-card .login-form > .eyebrow, .login-card h2, .login-card .login-form > p.muted { text-align: center; }
+.login-card .login-form > .eyebrow { display: block; }
+.login-card h2 { font-weight: 500; }
+.login-card input:not([type=checkbox]) {
+    min-height: 50px;
+    padding: 13px 17px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    transition: border-color 160ms ease,background-color 160ms ease;
+}
+.login-card input:not([type=checkbox]):hover { border-color: rgba(255,255,255,.25); }
+.login-card input:not([type=checkbox]):focus-visible { border-color: var(--gold); outline: 2px solid var(--gold); outline-offset: 3px; }
+.login-card .button { border-radius: 18px; background: linear-gradient(115deg,#ff9b45,#f57822); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); transition: transform 160ms ease,box-shadow 160ms ease; }
+@media (hover: hover) { .login-card .button:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3),0 6px 18px rgba(244,120,34,.18); } }
+.login-card .button:active { transform: translateY(0); }
+@keyframes login-card-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 639px) { .login-card { border-radius: 26px; } }
+@media (prefers-reduced-motion: reduce) { .login-card { animation: none; } .login-card input:not([type=checkbox]), .login-card .button { transition: none; } .login-card .button:hover { transform: none; } }
