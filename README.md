@@ -1,4 +1,4 @@
-# Parta GYM
+# SPARTA Gym & Pilates
 
 A working Laravel 13 gym operations application: server-managed login, owner/receptionist/member access, member registration, membership plans, invoice snapshots, verified manual payments, calendar-aware renewal, attendance, cashier reconciliation, member portal, live owner dashboard, CSV collections and audit history.
 

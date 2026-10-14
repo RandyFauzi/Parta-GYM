@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => env('GYM_NAME', 'Parta GYM'),
+    'name' => env('GYM_NAME', 'SPARTA Gym & Pilates'),
     'timezone' => env('GYM_TIMEZONE', 'Asia/Makassar'),
     'currency' => 'IDR',
     'payment_methods' => ['cash' => 'Tunai', 'bank_transfer' => 'Transfer bank', 'qris' => 'QRIS', 'card' => 'Kartu / EDC', 'other' => 'Lainnya'],

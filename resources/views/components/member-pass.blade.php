@@ -1,7 +1,7 @@
 @props(['member'])
 @php($period=$member->currentPeriod)
 <section class="m-pass" aria-label="Kartu anggota">
-    <div class="m-pass-top"><span>Parta GYM <span class="m-pass-divider">/</span> MEMBER CARD</span><x-status :status="$member->status==='suspended'?'suspended':($period?'active':'expired')"/></div>
+    <div class="m-pass-top"><span>SPARTA Gym &amp; Pilates <span class="m-pass-divider">/</span> MEMBER CARD</span><x-status :status="$member->status==='suspended'?'suspended':($period?'active':'expired')"/></div>
     <div class="m-pass-emblem"><x-icon name="gym"/></div>
     <h2>{{ $member->full_name }}</h2>
     <span class="m-pass-number">{{ $member->member_number }}</span>

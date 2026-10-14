@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#080809">
-    <title>@yield('title', 'Beranda') · Parta GYM</title>
+    <title>@yield('title', 'Beranda') · SPARTA Gym &amp; Pilates</title>
     @vite(['resources/css/app.css', 'resources/css/member.css', 'resources/css/cards.css','resources/js/app.js'])
 </head>
 <body class="member-theme member-app">
@@ -14,7 +14,7 @@
 @endphp
 <a class="skip-link" href="#main">Langsung ke konten</a>
 <aside class="member-rail">
-    <a class="brand" href="{{ route('portal') }}"><img class="parta-logo" src="{{ asset('images/Logos/Logo Parta GYM (putih).webp') }}" alt="Parta GYM" width="1361" height="413" decoding="async"></a>
+    <a class="brand" href="{{ route('portal') }}"><img class="parta-logo" src="{{ asset('images/Logos/sparta-logo-white.webp') }}" alt="SPARTA Gym &amp; Pilates" width="1301" height="325" decoding="async"></a>
     <div class="m-gym-label"><span class="online-dot"></span>{{ config('gym.name') }}</div>
     <nav aria-label="Navigasi anggota desktop">
         @foreach($navigation as [$route,$icon,$label])
@@ -26,7 +26,7 @@
 </aside>
 <div class="member-shell">
     <header class="member-header">
-        <a class="m-mobile-brand" href="{{ route('portal') }}"><img class="parta-logo" src="{{ asset('images/Logos/Logo Parta GYM (putih).webp') }}" alt="Parta GYM" width="1361" height="413" decoding="async"></a>
+        <a class="m-mobile-brand" href="{{ route('portal') }}"><img class="parta-logo" src="{{ asset('images/Logos/sparta-logo-white.webp') }}" alt="SPARTA Gym &amp; Pilates" width="1301" height="325" decoding="async"></a>
         <span class="m-desktop-breadcrumb">Member area <span>/</span> @yield('title')</span>
         <div class="m-header-user"><span class="m-header-gym">{{ config('gym.name') }}</span><a class="m-avatar" href="{{ route('portal.account') }}" aria-label="Buka profil">{{ mb_substr($member->full_name,0,1) }}</a></div>
     </header>
