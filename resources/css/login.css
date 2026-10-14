@@ -126,3 +126,14 @@
     .login-stage { gap: 0; }
     .login-card { padding: 20px; }
 }
+
+@media (max-height: 660px) {
+    .login-card .login-form > p.muted, .login-card .login-security { display: none; }
+    .login-card { padding: 18px 22px; }
+    .login-card h2 { font-size: 24px; margin-bottom: 18px; }
+    .login-card .login-form .field { margin: 12px 0; }
+    .login-card input:not([type=checkbox]) { min-height: 44px; padding-block: 9px; }
+    .login-card .button { min-height: 44px; }
+    .login-card .login-hint { margin-top: 12px; }
+    .login-stage { padding-block: 10px; }
+}
