@@ -8,3 +8,5 @@ bootstrap/cache/
 graphify-out/
 .env*
 *.lock
+
+public/favicon/

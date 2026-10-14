@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head><link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <head><link rel="icon" href="{{ asset('favicon.ico') }}?v={{ substr(hash_file('sha256',public_path('favicon.ico')),0,12) }}" type="image/x-icon">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 

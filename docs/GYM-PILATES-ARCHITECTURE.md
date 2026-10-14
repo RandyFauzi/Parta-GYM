@@ -1,6 +1,6 @@
 # Rancangan Gym, Pilates, kelas, personal trainer dan QR anggota
 
-Status: proposal implementasi, bukan fitur live atau migration yang sudah dijalankan.
+Status: rancangan jangka panjang. Implementasi tahap pertama kini mencakup CRUD User, role/profil personal trainer, studio_rooms, training_sessions dan class_enrollments (jadwal individual, kapasitas, konflik, peserta, absensi dan pembatalan). Schema entitlement, kredit, class_series dan QR di bawah masih proposal; belum dimigrasikan.
 Target: Laravel 13 / PHP 8.3, MySQL InnoDB pada Hostinger; Blade + Vite.
 Satu lokasi gym untuk tahap awal. Pembayaran tetap manual dan satu invoice membeli satu paket.
 

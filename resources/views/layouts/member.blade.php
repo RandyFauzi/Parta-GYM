@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="id">
-<head><link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+<head><link rel="icon" href="{{ asset('favicon.ico') }}?v={{ substr(hash_file('sha256',public_path('favicon.ico')),0,12) }}" type="image/x-icon">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#080809">
@@ -21,6 +21,7 @@
         @foreach($navigation as [$route,$icon,$label])
         <a href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><x-icon :name="$icon"/><span>{{ $label }}</span></a>
         @endforeach
+        <a href="{{ route('classes') }}" @if(request()->routeIs('classes','classes.*')) aria-current="page" @endif><x-icon name="layers"/><span>Kelas</span></a>
     </nav>
     <div class="m-rail-note"><x-icon name="gym"/><p>Informasi gym Anda,<br>dalam satu tempat.</p></div>
     <form action="{{ route('logout') }}" method="post">@csrf<button class="m-logout" aria-label="Keluar akun"><x-icon name="logout"/>Keluar akun</button></form>

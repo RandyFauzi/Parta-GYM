@@ -107,3 +107,19 @@ if (railToggle) {
   try { localStorage.setItem('sparta.sidebar.collapsed', String(collapsed)); } catch { /* Navigation still works without browser storage. */ }
  });
 }
+
+const userForm = document.querySelector('[data-user-form]');
+if (userForm) {
+ const role = userForm.querySelector('[name="role"]');
+ const memberFields = userForm.querySelector('[data-user-member]');
+ const trainerFields = userForm.querySelector('[data-user-trainer]');
+ const syncUserRole = () => {
+  memberFields.hidden = role.value !== 'member';
+  memberFields.querySelector('select').disabled = role.value !== 'member';
+  memberFields.querySelector('select').required = role.value === 'member';
+  trainerFields.hidden = role.value !== 'personal_trainer';
+  trainerFields.disabled = role.value !== 'personal_trainer';
+ };
+ role.addEventListener('change', syncUserRole);
+ syncUserRole();
+}

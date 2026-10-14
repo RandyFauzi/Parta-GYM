@@ -36,3 +36,5 @@ Thumbs.db
 !.env.example
 
 /graphify-out/
+
+/public/favicon/

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#080809">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v={{ substr(hash_file('sha256',public_path('favicon.ico')),0,12) }}" type="image/x-icon">
     <title>Masuk · SPARTA Gym &amp; Pilates</title>
     @vite(['resources/css/app.css','resources/css/login.css','resources/js/app.js'])
 </head>

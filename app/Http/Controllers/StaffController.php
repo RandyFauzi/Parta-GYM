@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StaffRequest;
 use App\Models\Member;
+use App\Models\StaffShift;
 use App\Models\User;
 use App\Services\MembershipService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class StaffController extends Controller
 {
@@ -35,7 +37,12 @@ class StaffController extends Controller
         abort_unless($user->role === 'receptionist', 403);
         DB::transaction(function () use ($user, $service) {
             $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            if ($user->is_active && StaffShift::where('active_staff_id', $user->id)->exists()) {
+                throw ValidationException::withMessages(['user' => 'Tutup shift kasir terlebih dahulu.']);
+            }
             $user->is_active = ! $user->is_active;
+            $user->remember_token = null;
+            DB::table('sessions')->where('user_id', $user->id)->delete();
             $user->save();
             $service->audit('staff.access_changed', (string) $user->id, ['is_active' => $user->is_active]);
         });
@@ -53,6 +60,6 @@ class StaffController extends Controller
             $service->audit('member.access_changed', $member->id, ['previous' => $previous, 'new' => $data['status'], 'reason' => $data['reason']]);
         });
 
-        return back()->with('success','Status akses anggota diperbarui dan diaudit.');
+        return back()->with('success', 'Status akses anggota diperbarui dan diaudit.');
     }
 }

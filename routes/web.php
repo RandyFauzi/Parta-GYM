@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GymController;
 use App\Http\Controllers\MemberPortalController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -30,7 +32,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/shifts/{shift}/close', [GymController::class, 'closeShift'])->name('shifts.close');
     });
     Route::middleware('role:owner')->prefix('admin')->group(function () {
-        Route::get('/staff', [StaffController::class, 'index'])->name('staff');
+        Route::get('/staff', [UserController::class, 'index'])->name('staff');
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/new', [UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::get('/users/{user}', [UserController::class, 'show'])->withTrashed()->name('users.show');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::get('/trainers', [UserController::class, 'index'])->name('trainers');
+        Route::get('/classes/new', [TrainingController::class, 'create'])->name('classes.create');
+        Route::post('/classes', [TrainingController::class, 'store'])->name('classes.store');
+        Route::get('/classes/{session}/edit', [TrainingController::class, 'edit'])->name('classes.edit');
+        Route::put('/classes/{session}', [TrainingController::class, 'update'])->name('classes.update');
+        Route::post('/classes/{session}/close', [TrainingController::class, 'close'])->name('classes.close');
+        Route::post('/rooms', [TrainingController::class, 'room'])->name('rooms.store');
         Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
         Route::post('/staff/{user}/toggle', [StaffController::class, 'toggle'])->name('staff.toggle');
         Route::post('/members/{member}/status', [StaffController::class, 'status'])->name('members.status');
@@ -42,6 +59,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/export', [GymController::class, 'export'])->name('reports.export');
         Route::get('/audit', [GymController::class, 'audit'])->name('audit');
     });
+    Route::get('/account', [UserController::class, 'account'])->name('account');
+    Route::get('/classes', [TrainingController::class, 'index'])->middleware('role:owner,receptionist,personal_trainer,member')->name('classes');
+    Route::get('/classes/{session}', [TrainingController::class, 'show'])->middleware('role:owner,receptionist,personal_trainer,member')->name('classes.show');
+    Route::post('/classes/{session}/participants', [TrainingController::class, 'enroll'])->middleware('role:owner,receptionist')->name('classes.enroll');
+    Route::put('/class-participants/{enrollment}', [TrainingController::class, 'attendance'])->middleware('role:owner,receptionist,personal_trainer')->name('classes.attendance');
     Route::get('/invoices/{invoice}', [GymController::class, 'receipt'])->name('invoices.show');
     Route::middleware('role:member')->group(function () {
         Route::get('/member', [MemberPortalController::class, 'home'])->name('portal');

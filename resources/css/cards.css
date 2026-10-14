@@ -349,3 +349,37 @@ body:is(.admin-app,.staff-app,.member-app) :is(.sidebar,.member-rail) nav > a:is
     .is-sidebar-collapsed .member-rail .m-logout { justify-content: center; font-size: 0; padding: 12px; border: 0; }
     .is-sidebar-collapsed .member-rail .m-logout > svg { width: 21px; height: 21px; flex-shrink: 0; }
 }
+
+/* Account profiles and training management follow the shared surface system. */
+.table-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.table-actions select { min-width: 145px; width: auto; }
+.user-trainer-fields { min-width: 0; padding: 22px; margin: 24px 0; border: 1px solid rgba(255,255,255,.1); border-radius: 20px; }
+.user-trainer-fields legend { padding: 0 8px; color: #ff8345; }
+[data-user-member][hidden],.user-trainer-fields[hidden] { display: none; }
+.user-profile-heading { display: flex; gap: 16px; align-items: center; margin-bottom: 25px; }
+.user-profile-heading .avatar { width: 60px; height: 60px; font-size: 24px; }
+.form-panel .m-detail-list { margin: 22px 0; }
+.form-panel .m-detail-list > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+.form-panel .m-detail-list dt { color: #bababa; }
+.form-panel .m-detail-list dd { margin: 0; overflow-wrap: anywhere; }
+.training-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
+.training-card { display: block; padding: 24px; }
+.training-card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+.training-card-top > svg { width: 30px; height: 30px; padding: 8px; border-radius: 50%; background: #ff6d29; color: #111; }
+.training-card h2 { margin-bottom: 18px; }
+.training-card p { color: #bababa; margin-top: 6px; }
+.training-card-footer { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid rgba(255,255,255,.08); margin-top: 22px; padding-top: 18px; margin-bottom: 18px; }
+.training-card-footer small { display: block; font-size: 11px; color: #bababa; margin-top: 4px; }
+.training-summary { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 20px; margin-bottom: 18px; }
+.training-summary small { display: block; color: #bababa; margin-bottom: 8px; }
+.training-summary strong { display: block; }
+.room-editor { margin-top: 18px; padding: 18px; background: rgba(0,0,0,.15); border-radius: 16px; }
+.room-editor summary { font-size: 14px; font-weight: 600; }
+@media (hover: hover) { .training-card:hover { box-shadow: inset 0 1px 0 rgba(255,109,41,.22),0 14px 28px rgba(0,0,0,.18); } }
+@media (max-width: 1199px) { .training-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .training-summary { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 639px) { .training-grid { grid-template-columns: 1fr; } .trainer-app .workspace-dock { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+
+.sidebar nav,.member-rail nav { min-height: 0; flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #453027 transparent; }
+.sidebar-bottom { flex-shrink: 0; }
+.workspace-more-panel { max-height: 65svh; overflow-y: auto; }
+@media (min-width: 640px) { .is-sidebar-collapsed .sidebar nav,.is-sidebar-collapsed .member-rail nav { padding-right: 0; } }

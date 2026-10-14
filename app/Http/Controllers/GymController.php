@@ -29,7 +29,7 @@ class GymController extends Controller
     public function home(Request $r): RedirectResponse
     {
         return redirect()->route(match ($r->user()->role) {
-            'owner' => 'dashboard','receptionist' => 'checkin',default => 'portal'
+            'owner' => 'dashboard','receptionist' => 'checkin','personal_trainer' => 'classes',default => 'portal'
         });
     }
 
