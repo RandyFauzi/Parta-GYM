@@ -19,8 +19,6 @@
         <section class="login-message" aria-labelledby="login-headline">
             <span class="eyebrow">JADI LEBIH KUAT, SETIAP HARI.</span>
             <h1 id="login-headline">LATIH<br>LEBIH KUAT.<br>JALANI HARI<br><span>LEBIH BAIK.</span></h1>
-            <p>Setiap repetisi adalah langkah maju. Bangun kekuatan, jaga konsistensi, dan mulai progres Anda di Parta GYM.</p>
-            <div class="login-message-foot"><span></span>RUANG UNTUK PROGRES ANDA.</div>
         </section>
         <section class="login-card" aria-labelledby="login-form-title">
             <div class="login-form">
