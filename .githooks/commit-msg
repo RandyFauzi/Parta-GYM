@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+head -n 1 "$1" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?(!)?: .+' || {
+ printf 'Use a Conventional Commit message, e.g. feat(members): add registration\n'
+ exit 1
+}

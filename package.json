@@ -1,0 +1,22 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "dev-all": "concurrently --kill-others --names laravel,vite --prefix-colors cyan,magenta \"php artisan serve\" \"npm run dev\"",
+        "check": "composer run check && npm run build",
+        "repo:setup": "git config --local core.hooksPath .githooks"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "concurrently": "^10.0.3",
+        "laravel-vite-plugin": "^3.1",
+        "tailwindcss": "^4.0.0",
+        "vite": "^8.0.0"
+    },
+    "optionalDependencies": {
+        "@laravel/multiplex": "^0.4.1"
+    }
+}
