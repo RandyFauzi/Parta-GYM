@@ -173,3 +173,5 @@
 .login-card { background: linear-gradient(145deg,rgba(30,23,23,.86),rgba(10,10,11,.94)) padding-box,linear-gradient(145deg,rgba(243,74,32,.6),rgba(255,255,255,.08)) border-box; }
 .login-card::before { background: radial-gradient(ellipse 190px 130px at 0 0,rgba(243,74,32,.22),transparent 75%); }
 .login-card .button { background: linear-gradient(115deg,#FF6D29,#F34A20 62%,#CF2D20); color: #FFFFFF; }
+
+.login-card .button { background: linear-gradient(115deg,#FF6D29,#F34A20 70%,#ED4727); color: #09090A; }

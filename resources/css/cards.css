@@ -305,3 +305,7 @@ body:is(.admin-app,.staff-app,.member-app) {
     .admin-app .owner-shortcuts > a:hover { background: linear-gradient(140deg,#2A1D19,#151213); }
 }
 @media print { body:is(.admin-app,.staff-app,.member-app) { background: white; } }
+
+.admin-app .kpi:nth-child(3)::before { background: linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,.38)),var(--card-accent); }
+:is(.admin-app,.staff-app) main .button:not(.secondary) { background: linear-gradient(115deg,#FF6D29,#F34A20 70%,#ED4727); color: #09090A; }
+@media (hover: hover) { :is(.admin-app,.staff-app) main .button:not(.secondary):hover { background: linear-gradient(115deg,#FF7837,#FF572C); } }
