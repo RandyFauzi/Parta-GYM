@@ -256,3 +256,46 @@
 @media print { .workspace-dock,.workspace-mobile-brand { display: none !important; } }
 
 @media (max-width: 639px) { :is(.admin-app,.staff-app) .topbar > div:first-child { min-width: 0; flex: 1; } :is(.admin-app,.staff-app) .topbar > div:first-child > strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .workspace-mobile-brand { flex-shrink: 0; } }
+
+/* Dashboard surfaces: static highlights, no blur on repeated cards. */
+.admin-app .kpi,
+.admin-app .owner-shortcuts > a,
+.admin-app .owner-chart,
+.admin-app .owner-bottom > .panel {
+    border: 1px solid transparent;
+    background: linear-gradient(145deg,#1b1b1e,#111113 75%) padding-box,
+        linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.055) 65%) border-box;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025),0 8px 24px rgba(0,0,0,.12);
+}
+.admin-app .kpi { position: relative; border-radius: 22px; overflow: hidden; }
+.admin-app .kpi::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 110px 90px at 100% 0,rgba(231,143,57,.075),transparent 75%);
+}
+.admin-app .kpi > * { position: relative; }
+.admin-app .kpi-icon,
+.admin-app .owner-shortcuts .owner-icon {
+    background: linear-gradient(145deg,rgba(255,152,60,.17),rgba(255,152,60,.055));
+    border: 1px solid rgba(255,166,82,.13);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    border-radius: 12px;
+}
+.admin-app .owner-shortcuts > a { border-radius: 18px; transition: transform 180ms ease,border-color 180ms ease,box-shadow 180ms ease; }
+.admin-app .owner-shortcuts > a > svg { transition: transform 180ms ease; }
+.admin-app .owner-followup {
+    background: radial-gradient(ellipse at 100% 0,rgba(216,158,76,.08),transparent 65%),linear-gradient(145deg,#1d1a16,#121213);
+    border-color: rgba(214,166,99,.23);
+    box-shadow: inset 0 1px 0 rgba(255,231,190,.055),0 8px 24px rgba(0,0,0,.12);
+}
+.admin-app .owner-welcome { border-color: rgba(230,181,112,.3); box-shadow: inset 0 1px 0 rgba(255,255,255,.08),0 10px 30px rgba(0,0,0,.15); }
+.admin-app .owner-bottom .panel-heading,
+.admin-app .owner-chart .panel-heading { background: linear-gradient(90deg,rgba(255,255,255,.02),transparent); }
+@media (hover: hover) {
+    .admin-app .owner-shortcuts > a:hover { transform: translateY(-2px); border-color: rgba(228,165,91,.32); box-shadow: inset 0 1px 0 rgba(255,255,255,.04),0 10px 24px rgba(0,0,0,.2); }
+    .admin-app .owner-shortcuts > a:hover > svg { transform: translateX(3px); }
+}
+.admin-app .owner-shortcuts > a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+    .admin-app .owner-shortcuts > a,.admin-app .owner-shortcuts > a > svg { transition: none; }
+    .admin-app .owner-shortcuts > a:hover,.admin-app .owner-shortcuts > a:hover > svg { transform: none; }
+}
