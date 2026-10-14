@@ -159,3 +159,11 @@
     .login-masthead { padding-block: 12px 8px; }
     .login-stage { justify-content: center; gap: 0; padding-top: 8px; }
 }
+
+.login-body { background-color: #161316; }
+.login-shade { background: radial-gradient(ellipse 60% 80% at 0 85%,rgba(255,109,41,.2),transparent 75%),linear-gradient(90deg,rgba(22,19,22,.86),rgba(69,48,39,.25) 52%,rgba(22,19,22,.72)),linear-gradient(0deg,rgba(22,19,22,.9),transparent 65%); }
+.login-card { background: linear-gradient(145deg,rgba(69,48,39,.75),rgba(22,19,22,.93)) padding-box,linear-gradient(145deg,rgba(255,109,41,.6),rgba(255,255,255,.08)) border-box; }
+.login-card::before { background: radial-gradient(ellipse 190px 130px at 0 0,rgba(255,109,41,.25),transparent 75%); }
+.login-card .login-form > .eyebrow,.login-message .eyebrow { color: #ff9e72; }
+.login-card .login-form > p.muted,.login-card .login-hint,.login-card .login-security { color: #BABABA; }
+.login-card .button { background: linear-gradient(120deg,#ff8a53,#FF6D29); color: #161316; }

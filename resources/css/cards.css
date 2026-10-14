@@ -226,3 +226,49 @@
     .admin-app .owner-shortcuts small { font-size: 11px; }
     .admin-app .kpi { border: 0; border-radius: 22px; }
 }
+
+/* Parta palette: orange, warm brown, charcoal, neutral grey and white. */
+body:is(.admin-app,.staff-app,.member-app) {
+    --card-shell: #161316;
+    --card-body: #161316;
+    --card-accent: linear-gradient(120deg,#ff9e72,#FF6D29);
+    --card-gold: linear-gradient(120deg,#ff9e72,#FF6D29);
+    --m-surface: #211a1c;
+    --owner-surface: #211a1c;
+    background-color: #161316;
+    background-image: radial-gradient(ellipse 38% 48% at 4% 0,rgba(255,109,41,.22),transparent 75%),
+        radial-gradient(ellipse 12% 45% at 28% 0,rgba(255,109,41,.095),transparent 72%),
+        radial-gradient(ellipse 44% 48% at 85% 0,rgba(69,48,39,.55),transparent 75%);
+    background-size: 100% 1100px;
+    background-repeat: no-repeat;
+}
+.admin-app .sidebar,.staff-app .sidebar,.member-app .member-rail { background: #161316; }
+.admin-app .topbar,.staff-app .topbar,.member-app .member-header { background: rgba(22,19,22,.9); }
+.admin-app .sidebar nav > a.selected,.member-app .member-rail nav > a[aria-current] { background: #453027; color: #FFFFFF; }
+.admin-app .kpi,.admin-app .kpi:nth-child(3),.admin-app .owner-shortcuts > a {
+    background: linear-gradient(140deg,#2d2222,#161316);
+}
+.admin-app .kpi::before { background: radial-gradient(ellipse at 0 0,rgba(255,109,41,.3),transparent 75%),#453027; }
+.admin-app .kpi:nth-child(3)::before,.admin-app .owner-shortcuts > a::before { background: var(--card-accent); }
+.admin-app .kpi .kpi-label { color: #FFFFFF; }
+.admin-app .kpi:nth-child(3) .kpi-label { color: #161316; }
+.admin-app .kpi .kpi-icon { color: #FFFFFF; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); }
+.admin-app .kpi:nth-child(3) .kpi-icon { color: #161316; background: rgba(22,19,22,.1); }
+.admin-app .kpi > small,.admin-app .kpi:nth-child(3) > small,.admin-app .owner-shortcuts small { color: #BABABA; }
+.admin-app .owner-shortcuts > a > svg { background: #FF6D29; color: #161316; }
+.admin-app .owner-shortcuts .owner-icon { color: #161316; }
+:is(.admin-app,.staff-app) main .panel,.member-app .m-surface,.member-app .m-stat,.member-app .m-invoice-card,.member-app .m-paid-card {
+    background: linear-gradient(140deg,#2a2121,#161316);
+}
+:is(.admin-app,.staff-app) .panel-heading { background: linear-gradient(110deg,rgba(255,109,41,.09),transparent); }
+:is(.admin-app,.staff-app) .info-card,.admin-app .owner-followup { background: radial-gradient(ellipse at 0 0,rgba(255,109,41,.12),transparent 75%),#241b1c; border-color: rgba(255,109,41,.2); }
+:is(.admin-app,.staff-app) main .plan-card,.member-app .m-plan,.member-app .m-pass { background: linear-gradient(140deg,#2e2222,#161316); }
+:is(.admin-app,.staff-app) .plan-price,.member-app .m-plan-price,.member-app .m-stat > strong { color: #FFFFFF; }
+.member-app .m-pass-number { color: #BABABA; }
+.member-app .m-pass-bottom small,.member-app .m-pass-emblem,.admin-app .owner-welcome-label,.admin-app .owner-welcome .eyebrow { color: #ff9e72; }
+:is(.admin-app,.staff-app) main .button:not(.secondary) { background: linear-gradient(120deg,#ff8a53,#FF6D29); color: #161316; }
+@media (hover: hover) {
+    :is(.admin-app,.staff-app) main .button:not(.secondary):hover { background: linear-gradient(120deg,#ff9e72,#ff7e42); }
+    .admin-app .owner-shortcuts > a:hover { background: linear-gradient(140deg,#453027,#241b1c); }
+}
+@media print { body:is(.admin-app,.staff-app,.member-app) { background: white; } }
