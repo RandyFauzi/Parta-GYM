@@ -307,3 +307,56 @@
 .registration-payment[hidden], [data-account-fields][hidden] { display: none; }
 .registration-total { display: block; font-size: 30px; color: var(--gold); margin-bottom: 20px; }
 [data-quick-registration] h2:not(:first-child) { margin-top: 28px; }
+
+/* Dashboard card redesign: distinct action tiles and a highlighted revenue card. */
+.admin-app .owner-shortcuts { gap: 16px; }
+.admin-app .owner-shortcuts > a {
+    display: grid;
+    grid-template-columns: 44px minmax(0,1fr) 30px;
+    grid-template-rows: 44px auto;
+    gap: 18px 12px;
+    padding: 22px;
+    background: linear-gradient(125deg,#242225,#141416) padding-box,
+        linear-gradient(135deg,rgba(255,255,255,.24),rgba(255,255,255,.07)) border-box;
+    border-radius: 22px;
+}
+.admin-app .owner-shortcuts .owner-icon { width: 44px; height: 44px; border-radius: 14px; background: #372619; color: #ffa34c; }
+.admin-app .owner-shortcuts > a > div { grid-column: 1 / -1; grid-row: 2; }
+.admin-app .owner-shortcuts strong { font-size: 16px; letter-spacing: -.3px; }
+.admin-app .owner-shortcuts small { font-size: 12px; margin-top: 6px; color: #b9b6b0; }
+.admin-app .owner-shortcuts > a > svg { grid-column: 3; grid-row: 1; width: 30px; height: 30px; padding: 7px; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; color: #e8c386; }
+.admin-app .kpi-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.admin-app .kpi {
+    min-height: 190px;
+    padding: 25px;
+    border-radius: 24px;
+    background: linear-gradient(130deg,#232326,#141416) padding-box,
+        linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,.07)) border-box;
+}
+.admin-app .kpi::before { background: radial-gradient(ellipse 220px 180px at 100% 0,rgba(255,153,64,.1),transparent 75%); }
+.admin-app .kpi-label { font-size: 14px; color: #d1cec8; }
+.admin-app .kpi-icon { width: 40px; height: 40px; background: rgba(255,161,70,.11); border-radius: 13px; }
+.admin-app .kpi > strong { display: block; font-size: clamp(30px,2.4vw,42px); letter-spacing: -1.2px; line-height: 1.15; margin: 22px 0 14px; font-weight: 600; }
+.admin-app .kpi > small { display: block; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.09); font-size: 12px; color: #b8b5b0; }
+.admin-app .kpi:nth-child(3) { background: linear-gradient(120deg,#f0cc8f,#cf984d); border-color: #efd19f; box-shadow: inset 0 1px 0 rgba(255,255,255,.4),0 10px 26px rgba(164,110,41,.1); }
+.admin-app .kpi:nth-child(3)::before { background: radial-gradient(ellipse at 100% 0,rgba(255,255,255,.32),transparent 70%); }
+.admin-app .kpi:nth-child(3) .kpi-label, .admin-app .kpi:nth-child(3) > strong { color: #251b11; }
+.admin-app .kpi:nth-child(3) > small { color: #4b3823; border-color: rgba(60,38,17,.17); }
+.admin-app .kpi:nth-child(3) .kpi-icon { background: rgba(72,43,14,.1); color: #342211; border-color: rgba(72,43,14,.17); }
+.admin-app .owner-chart, .admin-app .owner-bottom > .panel { border-radius: 24px; }
+@media (hover: hover) { .admin-app .owner-shortcuts > a:hover { background: linear-gradient(125deg,#302821,#1a1817) padding-box,linear-gradient(135deg,#c59a63,rgba(255,255,255,.12)) border-box; } }
+@media (max-width: 1199px) { .admin-app .owner-shortcuts { grid-template-columns: repeat(2,minmax(0,1fr)); } .admin-app .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 639px) {
+    .admin-app .owner-shortcuts { gap: 10px; }
+    .admin-app .owner-shortcuts > a { padding: 16px; grid-template-columns: 36px minmax(0,1fr) 26px; grid-template-rows: 36px auto; gap: 13px 8px; border-radius: 18px; }
+    .admin-app .owner-shortcuts .owner-icon { width: 36px; height: 36px; }
+    .admin-app .owner-shortcuts > a > svg { width: 26px; height: 26px; padding: 6px; }
+    .admin-app .owner-shortcuts strong { font-size: 14px; }
+    .admin-app .owner-shortcuts small { font-size: 11px; }
+    .admin-app .kpi-grid { gap: 10px; }
+    .admin-app .kpi { padding: 18px; min-height: 175px; border-radius: 20px; }
+    .admin-app .kpi:nth-child(3), .admin-app .kpi:nth-child(6) { grid-column: 1 / -1; }
+    .admin-app .kpi-label { font-size: 12px; }
+    .admin-app .kpi > strong { font-size: 32px; margin-block: 18px 12px; }
+    .admin-app .kpi > small { font-size: 11px; }
+}
