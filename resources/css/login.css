@@ -1,0 +1,26 @@
+.login-body { position: relative; isolation: isolate; min-height: 100dvh; background: #080809; color: #fff; }
+.login-backdrop { position: fixed; inset: 0; z-index: -3; width: 100%; height: 100%; object-fit: cover; object-position: center 42%; }
+.login-shade { position: fixed; inset: 0; z-index: -2; background: linear-gradient(90deg,rgba(5,5,6,.88),rgba(5,5,6,.24) 52%,rgba(5,5,6,.65)),linear-gradient(0deg,rgba(5,5,6,.85),transparent 45%,rgba(5,5,6,.4)); }
+.login-masthead { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 32px clamp(24px,5vw,88px); }
+.login-masthead .parta-logo { width: 170px; }
+.login-masthead > span, .login-bottom { font-size: 10px; letter-spacing: 1.7px; color: #c7c5c0; }
+.login-stage { width: 100%; max-width: 1680px; margin: 0 auto; padding: 46px clamp(24px,5vw,88px) 60px; display: grid; grid-template-columns: minmax(0,1fr) minmax(340px,440px); gap: clamp(40px,8vw,160px); align-items: center; min-height: calc(100dvh - 168px); }
+.login-message .eyebrow { color: var(--gold); font-size: 10px; }
+.login-message h1 { margin: 24px 0; font-size: clamp(48px,5.8vw,88px); font-weight: 750; line-height: .98; letter-spacing: -.055em; }
+.login-message h1 span { color: var(--orange); }
+.login-message p { max-width: 360px; color: #d0ceca; font-size: 14px; line-height: 1.8; }
+.login-message-foot { display: flex; align-items: center; gap: 13px; margin-top: 34px; font-size: 9px; letter-spacing: 1.8px; color: #d0ceca; }
+.login-message-foot span { width: 32px; height: 2px; background: var(--orange); }
+.login-card { padding: 36px; border: 1px solid rgba(255,255,255,.16); border-radius: 24px; background: rgba(15,15,16,.94); box-shadow: 0 24px 70px rgba(0,0,0,.25); }
+@supports (backdrop-filter: blur(12px)) { .login-card { background: rgba(15,15,16,.76); backdrop-filter: blur(12px); } }
+.login-card .login-form { max-width: none; }
+.login-card .login-form > .eyebrow { color: var(--gold); font-size: 9px; }
+.login-card h2 { margin-top: 14px; font-size: 28px; line-height: 1.15; letter-spacing: -.8px; }
+.login-card .login-form > p.muted { color: #b9b8b4; font-size: 13px; line-height: 1.7; margin: 14px 0 27px; }
+.login-card input:not([type=checkbox]) { background: rgba(7,7,8,.55); }
+.login-card .button { min-height: 48px; margin-top: 8px; }
+.login-card .login-security { margin-top: 25px; padding-top: 20px; }
+.login-bottom { display: flex; justify-content: space-between; gap: 20px; padding: 0 clamp(24px,5vw,88px) 24px; }
+@media (min-width: 1800px) { .login-backdrop { object-position: center 48%; } }
+@media (max-width: 900px) { .login-stage { gap: 30px; grid-template-columns: minmax(0,1fr) minmax(320px,380px); } .login-card { padding: 28px; } .login-message h1 { font-size: 48px; } .login-masthead > span { font-size: 8px; letter-spacing: 1px; } }
+@media (max-width: 639px) { .login-masthead { padding: 24px; } .login-masthead .parta-logo { width: 130px; } .login-masthead > span { display: none; } .login-stage { display: flex; flex-direction: column; align-items: stretch; gap: 32px; padding: 20px 24px 32px; min-height: auto; } .login-message h1 { font-size: clamp(42px,11vw,62px); margin: 18px 0; } .login-message p { font-size: 13px; } .login-message-foot { display: none; } .login-card { padding: 26px 22px; border-radius: 20px; } .login-card h2 { font-size: 25px; } .login-bottom { padding: 0 24px 24px; font-size: 8px; letter-spacing: 1px; } .login-bottom > span { text-align: right; } .login-backdrop { object-position: 60% center; } }
