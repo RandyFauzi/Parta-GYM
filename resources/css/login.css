@@ -137,3 +137,25 @@
     .login-card .login-hint { margin-top: 12px; }
     .login-stage { padding-block: 10px; }
 }
+
+@media (max-width: 639px) {
+    .login-masthead { justify-content: center; padding: 20px 20px 12px; }
+    .login-masthead .parta-logo { width: 136px; }
+    .login-stage { justify-content: flex-start; gap: clamp(18px,3svh,28px); padding-top: 18px; }
+    .login-message { text-align: center; }
+    .login-message h1 { font-size: clamp(27px,4.5svh,38px); line-height: 1.08; letter-spacing: -.045em; }
+}
+@media (max-width: 639px) and (min-height: 680px) and (max-height: 740px) {
+    .login-message { display: block; }
+    .login-masthead { padding-block: 14px 8px; }
+    .login-stage { gap: 16px; padding-top: 10px; }
+    .login-message h1 { font-size: 28px; }
+    .login-card { padding: 18px 20px; }
+    .login-card .login-form > p.muted { margin: 8px 0 12px; }
+    .login-card .login-form .field { margin: 12px 0; }
+    .login-card .login-hint { margin-top: 12px; }
+}
+@media (max-width: 639px) and (max-height: 679px) {
+    .login-masthead { padding-block: 12px 8px; }
+    .login-stage { justify-content: center; gap: 0; padding-top: 8px; }
+}
