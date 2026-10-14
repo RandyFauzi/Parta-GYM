@@ -1,0 +1,18 @@
+# Hostinger: the repository lives in public_html; only public/ is web-accessible.
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Deny dotfiles and hidden directories, allowing public ACME challenges.
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+
+    # Every external path is resolved inside Laravel's public directory.
+    # Do not bypass rewriting for existing repository files or directories.
+    RewriteRule ^(?!public(?:/|$))(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "(?i)^(?:\.env.*|\.git.*|composer\.(?:json|lock)|artisan)$">
+    Require all denied
+</FilesMatch>
