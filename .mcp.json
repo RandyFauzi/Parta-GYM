@@ -6,6 +6,13 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "graphify": {
+            "command": "node",
+            "args": [
+                "resources/js/graphify-cli.mjs",
+                "mcp"
+            ]
         }
     }
 }

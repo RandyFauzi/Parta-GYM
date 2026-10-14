@@ -7,7 +7,10 @@
         "dev": "vite",
         "dev-all": "concurrently --kill-others --names laravel,vite --prefix-colors cyan,magenta \"php artisan serve\" \"npm run dev\"",
         "check": "composer run check && npm run build",
-        "repo:setup": "git config --local core.hooksPath .githooks"
+        "repo:setup": "git config --local core.hooksPath .githooks",
+        "graphify": "node resources/js/graphify-cli.mjs",
+        "graph:index": "npm run graphify -- extract . --code-only --max-workers 2",
+        "graph:update": "npm run graphify -- update ."
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

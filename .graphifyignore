@@ -1,0 +1,10 @@
+vendor/
+node_modules/
+.codex/
+.git/
+public/build/
+storage/
+bootstrap/cache/
+graphify-out/
+.env*
+*.lock

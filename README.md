@@ -1,4 +1,4 @@
-# GYM OS · PARTA GYM
+# Parta GYM
 
 A working Laravel 13 gym operations application: server-managed login, owner/receptionist/member access, member registration, membership plans, invoice snapshots, verified manual payments, calendar-aware renewal, attendance, cashier reconciliation, member portal, live owner dashboard, CSV collections and audit history.
 
@@ -68,3 +68,23 @@ Review `git diff` and stage intentional files before committing. Fetch/pull remo
 before pushing; keep shared branch history intact and avoid force pushes to main.
 Use feature branches and pull requests for future substantive changes.
 Local environment files, databases, dependencies and generated build output are excluded.
+
+## Local code graph (Graphify)
+
+Official tool: https://github.com/Graphify-Labs/graphify (package `graphifyy`, pinned to 0.9.90).
+Install in an isolated environment; it does not change application dependencies:
+
+```powershell
+python -m venv .codex/tools/graphify-venv
+.codex/tools/graphify-venv/Scripts/python.exe -m pip install "graphifyy[mcp]==0.9.90"
+npm run graphify -- install --project --platform codex
+npm run graph:index
+```
+
+On Linux/macOS use `.codex/tools/graphify-venv/bin/python` for the installation command.
+Use `npm run graphify -- query "MembershipService" --budget 1500` before broad source reads,
+and `npm run graph:update` after code changes. `.mcp.json` also registers the local stdio server;
+restart the client to load it. The generated graph and Python environment stay local and ignored.
+The code-only index uses AST parsing without an external model API. It does not cover CSS or
+Blade layout semantics completely; verify relevant source and tests before changing behavior.
+Token savings depend on the task and have not been benchmarked for this project.

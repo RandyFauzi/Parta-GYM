@@ -34,3 +34,5 @@ Thumbs.db
 *.pem
 .env.*
 !.env.example
+
+/graphify-out/
