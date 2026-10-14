@@ -272,3 +272,36 @@ body:is(.admin-app,.staff-app,.member-app) {
     .admin-app .owner-shortcuts > a:hover { background: linear-gradient(140deg,#453027,#241b1c); }
 }
 @media print { body:is(.admin-app,.staff-app,.member-app) { background: white; } }
+
+/* Saturated ember accents over neutral black surfaces. */
+body:is(.admin-app,.staff-app,.member-app) {
+    --card-shell: #09090A;
+    --card-body: #111112;
+    --card-accent: linear-gradient(115deg,#FF6D29,#F34A20 62%,#CF2D20);
+    --card-gold: linear-gradient(115deg,#FF6D29,#F34A20 62%,#CF2D20);
+    --m-surface: #111112;
+    --owner-surface: #111112;
+    background-color: #09090A;
+    background-image: radial-gradient(ellipse 42% 42% at 8% 0,rgba(207,45,32,.13),transparent 75%),radial-gradient(ellipse 35% 38% at 85% 0,rgba(255,109,41,.08),transparent 75%);
+}
+.admin-app .sidebar,.staff-app .sidebar,.member-app .member-rail { background: #0C0C0D; }
+.admin-app .topbar,.staff-app .topbar,.member-app .member-header { background: rgba(12,12,13,.94); }
+.admin-app .sidebar nav > a.selected,.member-app .member-rail nav > a[aria-current] { background: #2C1812; color: #FF8345; }
+.admin-app .kpi,.admin-app .kpi:nth-child(3),.admin-app .owner-shortcuts > a,
+:is(.admin-app,.staff-app) main .panel,.member-app .m-surface,.member-app .m-stat,.member-app .m-invoice-card,.member-app .m-paid-card,
+:is(.admin-app,.staff-app) main .plan-card,.member-app .m-plan,.member-app .m-pass { background: linear-gradient(140deg,#1E1C1D,#101011); }
+.admin-app .kpi::before { background: radial-gradient(ellipse at 0 0,rgba(243,74,32,.14),transparent 75%),#241A18; }
+.admin-app .kpi:nth-child(3)::before,.admin-app .owner-shortcuts > a::before { background: var(--card-accent); }
+.admin-app .kpi:nth-child(3) .kpi-label { color: #FFFFFF; }
+.admin-app .kpi:nth-child(3) .kpi-icon { color: #FFFFFF; background: rgba(0,0,0,.15); }
+.admin-app .owner-shortcuts .owner-icon { background: rgba(0,0,0,.12); color: #FFFFFF; }
+.admin-app .owner-shortcuts > a > svg { background: #FF6D29; color: #101011; }
+:is(.admin-app,.staff-app) main .button:not(.secondary) { background: var(--card-accent); color: #FFFFFF; }
+:is(.admin-app,.staff-app) main .plan-card > .eyebrow,.member-app .m-plan-top,.member-app .m-plan-top > span,.member-app .m-pass-top > span { color: #FFFFFF; }
+.member-app .m-pass-divider { color: rgba(255,255,255,.65); }
+.member-app .m-balance-card .m-kicker,.member-app .m-balance-card > strong,.member-app .m-balance-card p { color: #FFFFFF; }
+@media (hover: hover) {
+    :is(.admin-app,.staff-app) main .button:not(.secondary):hover { background: linear-gradient(115deg,#FF7837,#F55828 62%,#DB3927); }
+    .admin-app .owner-shortcuts > a:hover { background: linear-gradient(140deg,#2A1D19,#151213); }
+}
+@media print { body:is(.admin-app,.staff-app,.member-app) { background: white; } }
