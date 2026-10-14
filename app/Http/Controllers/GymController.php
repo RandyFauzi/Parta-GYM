@@ -72,7 +72,7 @@ class GymController extends Controller
 
         return Member::with('currentPeriod.invoice')->when($r->filled('q'), function ($q) use ($r) {
             $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $r->q).'%';
-            $q->where(fn ($q) => $q->where('full_name', 'like', $term)->orWhere('member_number', 'like', $term)->orWhere('phone', 'like', $term));
+            $q->where(fn ($q) => $q->where('full_name', 'like', $term)->orWhere('member_number', 'like', $term)->orWhere('phone', 'like', $term)->when(preg_match('/^[0-9]{12,20}$/D', (string) $r->q), fn ($barcodeQuery) => $barcodeQuery->orWhere('user_id', ltrim($r->q, '0') ?: '0')));
         })->when($r->status === 'active', fn ($q) => $q->where('status', 'active')->whereHas('currentPeriod'))->when($r->status === 'expired', fn ($q) => $q->whereDoesntHave('currentPeriod'))->when($r->status === 'suspended', fn ($q) => $q->where('status', 'suspended'));
     }
 

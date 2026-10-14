@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
+use App\Services\MemberBarcode;
 use App\Services\MembershipService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -70,6 +71,16 @@ class MemberPortalController extends Controller
         return view('member.payments', ['member' => $member, 'outstanding' => $member->invoices()->where('status', 'unpaid')->sum('total_idr'), 'paid' => $member->invoices()->where('status', 'paid')->sum('total_idr'), 'invoices' => $member->invoices()->when($request->filled('status'), fn ($query) => $query->where('status', $request->status))->latest()->paginate(10)->withQueryString()]);
     }
 
+    public function card(Request $request, MemberBarcode $barcode): View
+    {
+        $member = $this->member($request);
+        $code = str_pad((string) $request->user()->id, 12, '0', STR_PAD_LEFT);
+        $usedVisits = $member->currentPeriod ? $member->checkins()->where('membership_period_id', $member->currentPeriod->id)->count() : 0;
+        $eligible = $member->status === 'active' && $member->currentPeriod && ($member->currentPeriod->visit_limit === null || $usedVisits < $member->currentPeriod->visit_limit);
+
+        return view('member.card', compact('member', 'code', 'usedVisits', 'eligible') + ['barcode' => $barcode->encode($code)]);
+    }
+
     public function account(Request $request): View
     {
         return view('member.profile', ['member' => $this->member($request)]);
@@ -117,6 +128,6 @@ class MemberPortalController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success','Kata sandi diperbarui. Masuk kembali dengan kata sandi baru.');
+        return redirect()->route('login')->with('success', 'Kata sandi diperbarui. Masuk kembali dengan kata sandi baru.');
     }
 }

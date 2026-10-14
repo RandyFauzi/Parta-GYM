@@ -9,7 +9,7 @@
 </head>
 <body class="member-theme member-app">
 @php
-    $navigation = [['portal','grid','Beranda'],['portal.membership','card','Membership'],['portal.visits','scan','Kunjungan'],['portal.payments','layers','Tagihan'],['portal.account','users','Profil']];
+    $navigation = [['portal','grid','Beranda'],['portal.membership','card','Membership'],['portal.card','scan','Check-in'],['portal.payments','layers','Tagihan'],['portal.account','users','Profil']];
     $currentRoute = request()->routeIs('portal.invoice') ? 'portal.payments' : request()->route()->getName();
 @endphp
 <a class="skip-link" href="#main">Langsung ke konten</a>
@@ -19,8 +19,9 @@
     <div class="m-gym-label"><span class="online-dot"></span>{{ config('gym.name') }}</div>
     <nav aria-label="Navigasi anggota desktop">
         @foreach($navigation as [$route,$icon,$label])
-        <a href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><x-icon :name="$icon"/><span>{{ $label }}</span></a>
+        <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><x-icon :name="$icon"/><span>{{ $label }}</span></a>
         @endforeach
+        <a href="{{ route('portal.visits') }}"><x-icon name="scan"/><span>Kunjungan</span></a>
         <a href="{{ route('classes') }}" @if(request()->routeIs('classes','classes.*')) aria-current="page" @endif><x-icon name="layers"/><span>Kelas</span></a>
     </nav>
     <div class="m-rail-note"><x-icon name="gym"/><p>Informasi gym Anda,<br>dalam satu tempat.</p></div>
@@ -40,8 +41,8 @@
     <footer class="member-footer"><span>{{ config('gym.name') }}</span><span>{{ config('gym.timezone') }} · IDR</span></footer>
 </div>
 <nav class="member-dock" aria-label="Navigasi anggota mobile" data-mobile-nav>
-    @foreach($navigation as [$route,$icon,$label])
-    <a href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><span class="m-dock-icon"><x-icon :name="$icon"/></span><span>{{ $route==='portal.membership'?'Paket':$label }}</span></a>
+    @foreach([['portal','grid','Beranda'],['portal.membership','card','Paket'],['portal.card','scan','Check-in'],['classes','layers','Kelas'],['portal.account','users','Profil']] as [$route,$icon,$label])
+    <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><span class="m-dock-icon"><x-icon :name="$icon"/></span><span>{{ $route==='portal.membership'?'Paket':$label }}</span></a>
     @endforeach
 </nav>
 </body>

@@ -1,3 +1,50 @@
+const scanner = document.querySelector('[data-barcode-scanner]');
+if (scanner) {
+ const start = scanner.querySelector('[data-scan-start]');
+ const stop = scanner.querySelector('[data-scan-stop]');
+ const video = scanner.querySelector('video');
+ const feedback = scanner.querySelector('[data-scan-feedback]');
+ let stream, running = false, generation = 0;
+ const close = () => {
+  generation++; running = false;
+  stream?.getTracks().forEach(track => track.stop());
+  stream = null; video.srcObject = null; video.hidden = true; stop.hidden = true; start.disabled = false;
+ };
+ stop.addEventListener('click', close);
+ window.addEventListener('pagehide', close);
+ document.addEventListener('visibilitychange', () => { if (document.hidden) close(); });
+ start.addEventListener('click', async () => {
+  start.disabled = true;
+  const attempt = ++generation;
+  try {
+   if (!window.BarcodeDetector || !navigator.mediaDevices?.getUserMedia || !(await BarcodeDetector.getSupportedFormats()).includes('code_39')) throw new Error('unsupported');
+   const detector = new BarcodeDetector({formats:['code_39']});
+   const acquired = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+   if (attempt !== generation) { acquired.getTracks().forEach(track => track.stop()); return; }
+   stream = acquired; video.srcObject = stream; video.hidden = false; stop.hidden = false;
+   await video.play();
+   if (attempt !== generation) return;
+   running = true; feedback.textContent = 'Arahkan kamera ke barcode kartu anggota.';
+   const detect = async () => {
+    if (!running || attempt !== generation) return;
+    try {
+     const codes = await detector.detect(video);
+     const code = codes.find(item => /^[0-9]{12,20}$/.test(item.rawValue));
+     if (code && running && attempt === generation) {
+      document.querySelector('.scan-search [name="q"]').value = code.rawValue;
+      close(); document.querySelector('.scan-search').requestSubmit(); return;
+     }
+    } catch { feedback.textContent = 'Barcode belum terbaca. Dekatkan kartu atau gunakan pencarian manual.'; }
+    if (running && attempt === generation) setTimeout(detect, 250);
+   };
+   detect();
+  } catch (error) {
+   if (attempt !== generation) return;
+   close(); feedback.textContent = error.message === 'unsupported' ? 'Browser belum mendukung scan barcode. Gunakan scanner USB atau ketik kode kartu.' : 'Kamera tidak dapat dibuka. Periksa izin kamera atau gunakan pencarian manual.';
+  }
+ });
+}
+
 document.querySelectorAll('form').forEach(form => {
  form.addEventListener('submit', () => {
   if (!form.checkValidity()) return;

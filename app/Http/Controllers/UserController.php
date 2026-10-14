@@ -21,7 +21,7 @@ class UserController extends Controller
     {
         $filters = $request->validate(['q' => 'nullable|string|max:100', 'role' => 'nullable|in:owner,receptionist,personal_trainer,member', 'status' => 'nullable|in:active,inactive,archived']);
         $trainerPage = $request->routeIs('trainers');
-        $query = User::query();
+        $query = User::with('trainerProfile');
         if (($filters['status'] ?? '') === 'archived') {
             $query->onlyTrashed();
         }

@@ -2,9 +2,9 @@
 @section('title','Detail kelas')
 @section('content')
 <div class="page-heading"><div><span class="eyebrow">{{ strtoupper($session->activity) }} · {{ $session->kind==='personal'?'PERSONAL TRAINING':'GROUP CLASS' }}</span><h1>{{ $session->title }}<span class="gold">.</span></h1><p>{{ $session->starts_at->timezone(config('gym.timezone'))->translatedFormat('l, d M Y') }} · {{ $session->starts_at->timezone(config('gym.timezone'))->format('H:i') }}–{{ $session->ends_at->timezone(config('gym.timezone'))->format('H:i') }}</p></div><div class="page-actions"><a class="button secondary" href="{{ route('classes') }}">Kembali</a>
-@if(auth()->user()->role==='owner')<a class="button secondary" href="{{ route('classes.create',['source'=>$session->id]) }}">Buat sesi serupa</a>
+@if(in_array(auth()->user()->role,['owner','personal_trainer'],true))<a class="button secondary" href="{{ route('classes.create',['source'=>$session->id]) }}">Buat sesi serupa</a>
 @endif
-@if(auth()->user()->role==='owner' && $session->status==='scheduled' && $session->starts_at->isFuture())<a class="button" href="{{ route('classes.edit',$session) }}">Edit jadwal</a>
+@if(in_array(auth()->user()->role,['owner','personal_trainer'],true) && $session->status==='scheduled' && $session->starts_at->isFuture())<a class="button" href="{{ route('classes.edit',$session) }}">Edit jadwal</a>
 @endif</div></div>
 <section class="panel form-panel"><div class="training-summary"><div><small>Trainer</small><strong>{{ $session->trainer->user->name }}</strong>
 @if(auth()->user()->role==='owner')<a class="text-link" href="{{ route('users.show',$session->trainer->user) }}">Profil trainer</a>
@@ -17,6 +17,9 @@
 @csrf<div class="field"><label for="member_id">Anggota</label><select id="member_id" name="member_id" required><option value="">Pilih anggota aktif</option>
 @foreach($members as $participant)<option value="{{ $participant->id }}">{{ $participant->full_name }} · {{ $participant->member_number }}</option>
 @endforeach</select></div><button class="button">Daftarkan peserta</button></form></section>
+@endif
+@if(auth()->user()->role==='member' && $session->status==='scheduled' && $session->starts_at->isFuture() && !$enrollments->contains(fn($item)=>$item->status!=='cancelled'))
+<section class="panel form-panel spaced"><h2>Siap ikut latihan?</h2><p>Pendaftaran langsung tercatat. Jadwal dan trainer bisa dilihat di Kelas saya.</p><form method="post" action="{{ route('classes.join',$session) }}">@csrf<button class="button">Ikut kelas <x-icon name="arrow"/></button></form></section>
 @endif
 <section class="panel spaced"><div class="panel-heading"><h2>{{ auth()->user()->role==='member'?'Pendaftaran saya':'Peserta & absensi' }}</h2></div><div class="table-wrap"><table><thead><tr><th>Anggota</th><th>Status</th>
 @if(auth()->user()->role!=='member')<th>Absensi</th>
@@ -31,9 +34,9 @@
 @else{{ $enrollment->attended_at?->timezone(config('gym.timezone'))->format('d M H:i') ?? '—' }}
 @endif</td>
 @endif</tr>
-@empty<tr><td colspan="3" class="empty">{{ auth()->user()->role==='member'?'Anda belum terdaftar. Hubungi front desk untuk mengikuti kelas.':'Belum ada peserta.' }}</td></tr>
+@empty<tr><td colspan="3" class="empty">{{ auth()->user()->role==='member'?'Anda belum terdaftar pada kelas ini.':'Belum ada peserta.' }}</td></tr>
 @endforelse</tbody></table></div></section>
-@if(auth()->user()->role==='owner' && $session->status==='scheduled')<section class="panel form-panel spaced"><h2>Tutup kelas</h2><form method="post" action="{{ route('classes.close',$session) }}">
+@if(in_array(auth()->user()->role,['owner','personal_trainer'],true) && $session->status==='scheduled')<section class="panel form-panel spaced"><h2>Tutup kelas</h2><form method="post" action="{{ route('classes.close',$session) }}">
 @csrf<div class="field"><label for="status">Tindakan</label><select id="status" name="status"><option value="completed">Selesaikan kelas (setelah sesi berakhir)</option><option value="cancelled">Batalkan kelas</option></select></div><x-field name="reason" label="Alasan pembatalan" minlength="5" maxlength="1000"/><label class="checkbox"><input type="checkbox" name="confirmed" value="1" required> Saya mengonfirmasi perubahan ini</label><button class="button secondary">Terapkan</button></form></section>
 @endif
 @endsection

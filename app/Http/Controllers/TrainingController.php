@@ -22,13 +22,17 @@ class TrainingController extends Controller
 {
     public function index(Request $request): View
     {
-        $data = $request->validate(['date' => 'nullable|date_format:Y-m-d', 'activity' => 'nullable|in:gym,pilates', 'status' => 'nullable|in:scheduled,completed,cancelled']);
+        $data = $request->validate(['date' => 'nullable|date_format:Y-m-d', 'activity' => 'nullable|in:gym,pilates', 'status' => 'nullable|in:scheduled,completed,cancelled', 'mine' => 'nullable|boolean']);
         $query = TrainingSession::with('trainer.user', 'room')->withCount(['enrollments as occupied' => fn ($q) => $q->whereIn('status', ['confirmed', 'attended', 'no_show'])]);
         if ($request->user()->role === 'personal_trainer') {
             $query->whereHas('trainer', fn ($q) => $q->where('user_id', $request->user()->id));
         }
         if ($request->user()->role === 'member') {
-            $query->where('status', 'scheduled')->where('ends_at', '>', now());
+            if ($request->boolean('mine')) {
+                $query->whereHas('enrollments', fn ($q) => $q->whereHas('member', fn ($m) => $m->where('user_id', $request->user()->id))->where('status', '!=', 'cancelled'));
+            } else {
+                $query->where('status', 'scheduled')->where('ends_at', '>', now());
+            }
         } elseif (! empty($data['status'])) {
             $query->where('status', $data['status']);
         }
@@ -48,6 +52,7 @@ class TrainingController extends Controller
         if ($request->filled('source')) {
             $request->validate(['source' => 'required|uuid|exists:training_sessions,id']);
             $original = TrainingSession::findOrFail($request->input('source'));
+            $this->authorizeSession($request, $original);
             $copy = new TrainingSession($original->only(['title', 'activity', 'kind', 'trainer_profile_id', 'studio_room_id', 'capacity', 'notes']));
             $copy->starts_at = $original->starts_at->addWeek();
             $copy->ends_at = $original->ends_at->addWeek();
@@ -58,14 +63,16 @@ class TrainingController extends Controller
         return $this->form(new TrainingSession(['activity' => 'pilates', 'kind' => 'group', 'capacity' => 8]));
     }
 
-    public function edit(TrainingSession $session): View
+    public function edit(Request $request, TrainingSession $session): View
     {
+        $this->authorizeSession($request, $session);
+
         return $this->form($session);
     }
 
     private function form(TrainingSession $session): View
     {
-        return view('gym.class-form', ['session' => $session, 'trainers' => TrainerProfile::with('user')->whereHas('user', fn ($q) => $q->where('role', 'personal_trainer')->where('is_active', true))->get(), 'rooms' => StudioRoom::where('is_active', true)->orderBy('name')->get()]);
+        return view('gym.class-form', ['session' => $session, 'trainers' => TrainerProfile::with('user')->when(auth()->user()->role === 'personal_trainer', fn ($q) => $q->where('user_id', auth()->id()))->whereHas('user', fn ($q) => $q->where('role', 'personal_trainer')->where('is_active', true))->get(), 'rooms' => StudioRoom::where('is_active', true)->orderBy('name')->get()]);
     }
 
     public function store(TrainingSessionRequest $request, TrainingService $service): RedirectResponse
@@ -77,6 +84,7 @@ class TrainingController extends Controller
 
     public function update(TrainingSessionRequest $request, TrainingSession $session, TrainingService $service): RedirectResponse
     {
+        $this->authorizeSession($request, $session);
         $service->save($request->validated(), $request->user(), $session);
 
         return redirect()->route('classes.show', $session)->with('success', 'Kelas diperbarui.');
@@ -101,6 +109,13 @@ class TrainingController extends Controller
         return view('gym.class-detail', ['session' => $session->load('trainer.user', 'room'), 'enrollments' => $enrollments, 'member' => $memberView ? $request->user()->member()->firstOrFail() : null, 'members' => in_array($request->user()->role, ['owner', 'receptionist'], true) ? Member::where('status', 'active')->orderBy('full_name')->get() : collect()]);
     }
 
+    public function join(Request $request, TrainingSession $session, TrainingService $service): RedirectResponse
+    {
+        $service->enroll($session, $request->user()->member()->firstOrFail(), $request->user());
+
+        return back()->with('success', 'Anda terdaftar. Jadwal tersedia di Kelas saya.');
+    }
+
     public function enroll(Request $request, TrainingSession $session, TrainingService $service): RedirectResponse
     {
         $data = $request->validate(['member_id' => 'required|uuid|exists:members,id']);
@@ -123,6 +138,7 @@ class TrainingController extends Controller
 
     public function close(Request $request, TrainingSession $session, TrainingService $service): RedirectResponse
     {
+        $this->authorizeSession($request, $session);
         $data = $request->validate(['status' => 'required|in:completed,cancelled', 'reason' => 'nullable|required_if:status,cancelled|string|min:5|max:1000', 'confirmed' => 'required|accepted']);
         $service->close($session, $data['status'], $data['reason'] ?? null, $request->user());
 

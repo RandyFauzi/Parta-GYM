@@ -115,4 +115,28 @@ class TrainingManagementTest extends TestCase
         $this->put('/admin/classes/'.$session->id, [...$data, 'starts_at' => now()->addDays(2)->timezone(config('gym.timezone'))->format('Y-m-d\TH:i'), 'ends_at' => now()->addDays(2)->addHour()->timezone(config('gym.timezone'))->format('Y-m-d\TH:i')])->assertSessionHasErrors('starts_at');
         $this->get('/admin/classes/new?source='.$session->id)->assertOk()->assertSee('Pilates Flow');
     }
+
+    public function test_trainer_schedules_only_own_classes_and_member_self_enrolls(): void
+    {
+        $trainer = TrainerProfile::factory()->create();
+        $other = TrainerProfile::factory()->create();
+        $data = $this->schedule($other, StudioRoom::factory()->create());
+        $this->actingAs($trainer->user)->get('/admin/classes/new')->assertOk();
+        $this->post('/admin/classes', $data)->assertSessionHasNoErrors();
+        $session = TrainingSession::firstOrFail();
+        $this->assertSame($trainer->id, $session->trainer_profile_id);
+        $foreign = TrainingSession::factory()->create(['trainer_profile_id' => $other->id]);
+        $this->get('/admin/classes/'.$foreign->id.'/edit')->assertForbidden();
+        $this->put('/admin/classes/'.$foreign->id, $data)->assertForbidden();
+        $this->post('/admin/classes/'.$foreign->id.'/close', ['status' => 'cancelled', 'reason' => 'Wrong class', 'confirmed' => 1])->assertForbidden();
+        $account = User::factory()->create(['role' => 'member']);
+        $member = Member::factory()->create(['user_id' => $account->id]);
+        $this->actingAs($account)->get('/classes/'.$session->id)->assertOk()->assertSee('Ikut kelas');
+        $this->post('/classes/'.$session->id.'/join', ['member_id' => Member::factory()->create()->id])->assertSessionHasNoErrors();
+        $this->post('/classes/'.$session->id.'/join')->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('class_enrollments', 1);
+        $this->assertDatabaseHas('class_enrollments', ['member_id' => $member->id, 'training_session_id' => $session->id]);
+        $this->get('/classes?mine=1')->assertOk()->assertSee('Pilates Flow');
+        $this->get('/admin/classes/new')->assertForbidden();
+    }
 }

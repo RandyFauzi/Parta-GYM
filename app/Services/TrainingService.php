@@ -26,6 +26,7 @@ class TrainingService
             $profile = $profiles->firstWhere('id', $data['trainer_profile_id']);
             $trainer = $trainerUsers->firstWhere('id', $profile?->user_id);
             $room = $rooms->firstWhere('id', $data['studio_room_id']);
+            abort_unless($actor->role === 'owner' || ($actor->role === 'personal_trainer' && $profile?->user_id === $actor->id && (! $session || $session->trainer_profile_id === $profile->id)), 403);
             if (! $trainer || ! $trainer->is_active || $trainer->role !== 'personal_trainer') {
                 throw ValidationException::withMessages(['trainer_profile_id' => 'Pilih trainer yang aktif.']);
             }
@@ -79,6 +80,7 @@ class TrainingService
     public function enroll(TrainingSession $session, Member $member, User $actor): void
     {
         DB::transaction(function () use ($session, $member, $actor) {
+            abort_unless(in_array($actor->role, ['owner', 'receptionist'], true) || ($actor->role === 'member' && $member->user_id === $actor->id), 403);
             $member = Member::whereKey($member->id)->lockForUpdate()->firstOrFail();
             $session = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             if ($member->status !== 'active' || $session->status !== 'scheduled' || $session->starts_at->lte(now())) {
@@ -123,6 +125,7 @@ class TrainingService
     {
         DB::transaction(function () use ($session, $status, $reason, $actor) {
             $session = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
+            abort_unless($actor->role === 'owner' || ($actor->role === 'personal_trainer' && $session->trainer->user_id === $actor->id), 403);
             if ($session->status !== 'scheduled') {
                 return;
             }
