@@ -1448,7 +1448,7 @@ input[aria-invalid=true]  {
  .login-form h2 { font-size: 25px; }
 }
 
-/* Keep the supplied dark wordmark legible on every surface. */
-.parta-logo { display: block; width: 150px; max-width: 100%; height: auto; padding: 8px 10px; border-radius: 8px; background: #f5f3ef; }
+/* The white wordmark sits directly on the dark application surfaces. */
+.parta-logo { display: block; width: 150px; max-width: 100%; height: auto; background: transparent; }
 .login-story .parta-logo { width: 190px; }
-@media (max-width: 639px) { .m-mobile-brand .parta-logo, .workspace-mobile-brand .parta-logo { width: 106px; padding: 6px 8px; border-radius: 6px; } }
+@media (max-width: 639px) { .m-mobile-brand .parta-logo, .workspace-mobile-brand .parta-logo { width: 106px; } }
