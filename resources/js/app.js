@@ -17,14 +17,14 @@ if (scanner) {
   start.disabled = true;
   const attempt = ++generation;
   try {
-   if (!window.BarcodeDetector || !navigator.mediaDevices?.getUserMedia || !(await BarcodeDetector.getSupportedFormats()).includes('code_39')) throw new Error('unsupported');
-   const detector = new BarcodeDetector({formats:['code_39']});
+   if (!window.BarcodeDetector || !navigator.mediaDevices?.getUserMedia || !(await BarcodeDetector.getSupportedFormats()).includes('qr_code')) throw new Error('unsupported');
+   const detector = new BarcodeDetector({formats:['qr_code']});
    const acquired = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
    if (attempt !== generation) { acquired.getTracks().forEach(track => track.stop()); return; }
    stream = acquired; video.srcObject = stream; video.hidden = false; stop.hidden = false;
    await video.play();
    if (attempt !== generation) return;
-   running = true; feedback.textContent = 'Arahkan kamera ke barcode kartu anggota.';
+   running = true; feedback.textContent = 'Arahkan kamera ke QR Code kartu anggota.';
    const detect = async () => {
     if (!running || attempt !== generation) return;
     try {
@@ -34,13 +34,13 @@ if (scanner) {
       document.querySelector('.scan-search [name="q"]').value = code.rawValue;
       close(); document.querySelector('.scan-search').requestSubmit(); return;
      }
-    } catch { feedback.textContent = 'Barcode belum terbaca. Dekatkan kartu atau gunakan pencarian manual.'; }
+    } catch { feedback.textContent = 'QR Code belum terbaca. Dekatkan kartu atau gunakan pencarian manual.'; }
     if (running && attempt === generation) setTimeout(detect, 250);
    };
    detect();
   } catch (error) {
    if (attempt !== generation) return;
-   close(); feedback.textContent = error.message === 'unsupported' ? 'Browser belum mendukung scan barcode. Gunakan scanner USB atau ketik kode kartu.' : 'Kamera tidak dapat dibuka. Periksa izin kamera atau gunakan pencarian manual.';
+   close(); feedback.textContent = error.message === 'unsupported' ? 'Browser belum mendukung scan QR Code. Gunakan scanner USB atau ketik kode kartu.' : 'Kamera tidak dapat dibuka. Periksa izin kamera atau gunakan pencarian manual.';
   }
  });
 }
