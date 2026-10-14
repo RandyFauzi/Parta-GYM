@@ -145,3 +145,24 @@
 .member-app .m-balance-card .m-kicker,.member-app .m-balance-card > strong,.member-app .m-balance-card p { color: #291609; }
 .member-app .m-paid-card { border: 1px solid var(--card-edge); border-radius: 28px; background: linear-gradient(145deg,#252528,#161618); }
 @media (max-width: 639px) { .member-app .m-pass { border-width: 4px; border-radius: 26px; } .member-app .m-pass-top > span { font-size: 8px; } }
+
+/* Unframed photo banner and restrained primary actions. */
+.admin-app .owner-welcome { border: 0; box-shadow: none; }
+:is(.admin-app,.staff-app) main .button:not(.secondary) {
+    min-height: 48px;
+    padding: 13px 21px;
+    border: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg,#f6a75b,#ec8738);
+    color: #25170d;
+    font-weight: 600;
+    letter-spacing: -.1px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 4px 12px rgba(0,0,0,.15);
+    transition: transform 160ms ease,background-color 160ms ease,box-shadow 160ms ease;
+}
+:is(.admin-app,.staff-app) main .button:not(.secondary) > svg { width: 17px; height: 17px; stroke-width: 1.8; }
+@media (hover: hover) {
+    :is(.admin-app,.staff-app) main .button:not(.secondary):hover { background: linear-gradient(135deg,#ffb873,#f19545); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3),0 7px 16px rgba(0,0,0,.2); }
+}
+:is(.admin-app,.staff-app) main .button:not(.secondary):active { transform: translateY(0); box-shadow: inset 0 2px 4px rgba(81,38,10,.12); }
+@media (prefers-reduced-motion: reduce) { :is(.admin-app,.staff-app) main .button:not(.secondary) { transition: none; transform: none; } }
