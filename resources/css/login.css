@@ -82,3 +82,47 @@
 .login-card .login-hint { font-size: 13px; line-height: 1.7; }
 .login-card .login-security { font-size: 12px; line-height: 1.6; }
 .login-card .field-error { font-size: 13px; }
+
+/* Fit the normal login state to the viewport without clipping form controls. */
+.login-body { display: flex; flex-direction: column; min-height: 100svh; }
+.login-masthead { flex-shrink: 0; padding-block: clamp(16px,3svh,28px); }
+.login-stage { flex: 1; min-height: 0; padding-block: clamp(16px,3svh,32px); }
+.login-card { padding: clamp(24px,4svh,36px); }
+.login-card .login-form .field { margin: clamp(14px,2.5svh,23px) 0; }
+.login-card .login-form > p.muted { margin: 12px 0 20px; }
+.login-card .login-security { margin-top: 20px; padding-top: 16px; }
+@media (min-width: 640px) and (max-height: 800px) {
+    .login-masthead { padding-block: 16px; }
+    .login-masthead .parta-logo { width: 140px; }
+    .login-stage { padding-block: 12px; }
+    .login-card { padding: 24px 30px; }
+    .login-card .login-form .field { margin: 14px 0; }
+    .login-card h2 { font-size: 28px; margin-top: 10px; }
+    .login-card .login-form > p.muted { margin: 10px 0 16px; }
+    .login-card .login-hint { margin-top: 16px; }
+    .login-card .login-security { margin-top: 16px; padding-top: 12px; }
+    .login-message h1 { font-size: clamp(42px,7svh,64px); }
+}
+@media (max-width: 639px) {
+    .login-masthead { padding: 14px 20px 8px; }
+    .login-masthead .parta-logo { width: 112px; }
+    .login-stage { justify-content: center; gap: 16px; padding: 10px 20px 20px; }
+    .login-message .eyebrow { display: none; }
+    .login-message h1 { margin: 0; font-size: clamp(24px,4.2svh,36px); line-height: 1; }
+    .login-message h1 br:first-of-type, .login-message h1 br:nth-of-type(3) { display: none; }
+    .login-message h1 br:first-of-type::after, .login-message h1 br:nth-of-type(3)::after { content: ' '; }
+    .login-card { padding: 22px; }
+    .login-card .login-form > .eyebrow { font-size: 10px; }
+    .login-card h2 { font-size: 25px; margin-top: 10px; }
+    .login-card .login-form > p.muted { font-size: 14px; margin: 10px 0 16px; }
+    .login-card .login-form .field { margin: 14px 0; }
+    .login-card input:not([type=checkbox]) { min-height: 46px; padding-block: 10px; }
+    .login-card .button { min-height: 46px; }
+    .login-card .login-hint { margin-top: 16px; font-size: 12px; }
+    .login-card .login-security { display: none; }
+}
+@media (max-width: 639px) and (max-height: 740px) {
+    .login-message { display: none; }
+    .login-stage { gap: 0; }
+    .login-card { padding: 20px; }
+}

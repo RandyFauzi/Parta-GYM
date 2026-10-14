@@ -17,7 +17,7 @@
     <main class="login-stage">
         <section class="login-message" aria-labelledby="login-headline">
             <span class="eyebrow">JADI LEBIH KUAT, SETIAP HARI.</span>
-            <h1 id="login-headline">LATIH<br>LEBIH KUAT.<br>JALANI HARI<br><span>LEBIH BAIK.</span></h1>
+            <h1 id="login-headline">LATIH <br>LEBIH KUAT.<br>JALANI HARI <br><span>LEBIH BAIK.</span></h1>
         </section>
         <section class="login-card" aria-labelledby="login-form-title">
             <div class="login-form">
@@ -28,6 +28,5 @@
             </div>
         </section>
     </main>
-    <footer class="login-bottom">{{ config('gym.name') }} </footer>
 </body>
 </html>
