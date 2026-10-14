@@ -84,3 +84,26 @@ if (registration) {
  registration.addEventListener('change', syncRegistration);
  syncRegistration();
 }
+
+const railToggle = document.querySelector('[data-rail-toggle]');
+if (railToggle) {
+ const rail = railToggle.closest('aside');
+ const applyRailState = collapsed => {
+  document.body.classList.toggle('is-sidebar-collapsed', collapsed);
+  railToggle.setAttribute('aria-expanded', String(!collapsed));
+  const label = collapsed ? 'Perluas sidebar' : 'Ringkas sidebar';
+  railToggle.setAttribute('aria-label', label);
+  railToggle.title = label;
+ };
+ rail.querySelectorAll('nav > a').forEach(link => {
+  const label = link.textContent.trim();
+  link.setAttribute('aria-label', label);
+  link.title = label;
+ });
+ try { applyRailState(localStorage.getItem('sparta.sidebar.collapsed') === 'true'); } catch { applyRailState(false); }
+ railToggle.addEventListener('click', () => {
+  const collapsed = !document.body.classList.contains('is-sidebar-collapsed');
+  applyRailState(collapsed);
+  try { localStorage.setItem('sparta.sidebar.collapsed', String(collapsed)); } catch { /* Navigation still works without browser storage. */ }
+ });
+}

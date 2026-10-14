@@ -14,6 +14,7 @@
 @endphp
 <a class="skip-link" href="#main">Langsung ke konten</a>
 <aside class="member-rail">
+    <button type="button" class="rail-toggle" data-rail-toggle aria-expanded="true" aria-label="Ringkas sidebar" title="Ringkas sidebar"><x-icon name="arrow"/></button>
     <a class="brand" href="{{ route('portal') }}"><img class="parta-logo" src="{{ asset('images/Logos/sparta-logo-white.webp') }}" alt="SPARTA Gym &amp; Pilates" width="1301" height="325" decoding="async"></a>
     <div class="m-gym-label"><span class="online-dot"></span>{{ config('gym.name') }}</div>
     <nav aria-label="Navigasi anggota desktop">
@@ -22,7 +23,7 @@
         @endforeach
     </nav>
     <div class="m-rail-note"><x-icon name="gym"/><p>Informasi gym Anda,<br>dalam satu tempat.</p></div>
-    <form action="{{ route('logout') }}" method="post">@csrf<button class="m-logout"><x-icon name="logout"/>Keluar akun</button></form>
+    <form action="{{ route('logout') }}" method="post">@csrf<button class="m-logout" aria-label="Keluar akun"><x-icon name="logout"/>Keluar akun</button></form>
 </aside>
 <div class="member-shell">
     <header class="member-header">

@@ -309,3 +309,43 @@ body:is(.admin-app,.staff-app,.member-app) {
 .admin-app .kpi:nth-child(3)::before { background: linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,.38)),var(--card-accent); }
 :is(.admin-app,.staff-app) main .button:not(.secondary) { background: linear-gradient(115deg,#FF6D29,#F34A20 70%,#ED4727); color: #09090A; }
 @media (hover: hover) { :is(.admin-app,.staff-app) main .button:not(.secondary):hover { background: linear-gradient(115deg,#FF7837,#FF572C); } }
+
+/* Expanded navigation and compact icon rail share one active treatment. */
+.rail-toggle { display: grid; place-items: center; position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border: 0; border-radius: 9px; color: #bababa; background: transparent; }
+.rail-toggle:hover { color: #fff; background: rgba(255,255,255,.06); }
+.rail-toggle > svg { width: 16px; height: 16px; transform: rotate(180deg); }
+:is(.sidebar,.member-rail) nav > a { position: relative; min-height: 48px; gap: 12px; border-radius: 12px; font-size: 14px; color: #bababa; border: 1px solid transparent; }
+:is(.sidebar,.member-rail) nav > a:hover { color: #fff; background: rgba(255,255,255,.035); }
+:is(.sidebar,.member-rail) nav > a:is(.selected,[aria-current]) {
+    color: #fff;
+    background: linear-gradient(100deg,#28282b,#1a181b 72%,rgba(243,74,32,.16));
+    border-color: rgba(255,255,255,.09);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+:is(.sidebar,.member-rail) nav > a:is(.selected,[aria-current])::after {
+    content: ''; display: block; position: absolute; inset: 9px 0 9px auto; width: 3px; border-radius: 3px;
+    background: linear-gradient(#ff6d29,#e53424); box-shadow: 0 0 12px rgba(255,78,38,.6);
+}
+:is(.sidebar,.member-rail) nav > a:is(.selected,[aria-current]) > svg { color: #fff; }
+@media (min-width: 640px) {
+    .is-sidebar-collapsed .sidebar,.is-sidebar-collapsed .member-rail { width: 80px; padding: 52px 12px 20px; }
+    .is-sidebar-collapsed .main-shell,.is-sidebar-collapsed .member-shell { margin-left: 80px; }
+    .is-sidebar-collapsed .rail-toggle { top: 12px; right: 25px; }
+    .is-sidebar-collapsed .rail-toggle > svg { transform: none; }
+    .is-sidebar-collapsed :is(.sidebar,.member-rail) .brand { margin: 0 0 25px; padding: 0; }
+    .is-sidebar-collapsed :is(.sidebar,.member-rail) .parta-logo { width: 56px; }
+    .is-sidebar-collapsed :is(.sidebar,.member-rail) nav > a { width: 56px; min-height: 48px; justify-content: center; padding: 12px; margin-block: 7px; }
+    .is-sidebar-collapsed :is(.sidebar,.member-rail) nav > a > svg { width: 21px; height: 21px; flex-shrink: 0; }
+    .is-sidebar-collapsed :is(.sidebar,.member-rail) nav > a > span,
+    .is-sidebar-collapsed .sidebar .workspace,
+    .is-sidebar-collapsed .sidebar .nav-label,
+    .is-sidebar-collapsed .sidebar .system-note,
+    .is-sidebar-collapsed .sidebar .user-row > div,
+    .is-sidebar-collapsed .sidebar .user-row > .avatar,
+    .is-sidebar-collapsed .member-rail .m-gym-label,
+    .is-sidebar-collapsed .member-rail .m-rail-note { display: none; }
+    .is-sidebar-collapsed .sidebar .user-row { justify-content: center; padding-inline: 0; }
+    .is-sidebar-collapsed .member-rail > form { margin-top: auto; }
+    .is-sidebar-collapsed .member-rail .m-logout { justify-content: center; font-size: 0; padding: 12px; border: 0; }
+    .is-sidebar-collapsed .member-rail .m-logout > svg { width: 21px; height: 21px; flex-shrink: 0; }
+}
