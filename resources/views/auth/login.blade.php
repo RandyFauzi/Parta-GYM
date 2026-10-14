@@ -21,9 +21,9 @@
         </section>
         <section class="login-card" aria-labelledby="login-form-title">
             <div class="login-form">
-                <span class="eyebrow">AKUN PARTA GYM</span>
-                <h2 id="login-form-title">Siap untuk sesi berikutnya?</h2>
-                <p class="muted">Masuk untuk melihat membership dan aktivitas Anda.</p>
+                <span class="eyebrow">PARTA GYM</span>
+                <h2 id="login-form-title">Progres dimulai di sini.</h2>
+                <p class="muted">Masuk. Lanjutkan latihanmu.</p>
 @if(session('success'))<div class="alert success" role="status">{{ session('success') }}</div>@endif @if($errors->any())<div class="alert error" role="alert">{{ $errors->first() }}</div>@endif<form action="{{ route('login.store') }}" method="post">@csrf<x-field name="email" label="Email" type="email" required autocomplete="username" autofocus/><x-field name="password" label="Kata sandi" type="password" required autocomplete="current-password"/><label class="checkbox"><input type="checkbox" name="remember" value="1"> Tetap masuk di perangkat ini</label><button class="button wide">Masuk <x-icon name="arrow"/></button></form><p class="login-hint">Belum memiliki akun? Hubungi pengelola gym untuk mendapatkan akses.</p><div class="login-security"><x-icon name="check"/> Akses membership dan aktivitas gym Anda</div>
             </div>
         </section>
