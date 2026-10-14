@@ -70,3 +70,15 @@
 @keyframes login-card-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 639px) { .login-card { border-radius: 26px; } }
 @media (prefers-reduced-motion: reduce) { .login-card { animation: none; } .login-card input:not([type=checkbox]), .login-card .button { transition: none; } .login-card .button:hover { transform: none; } }
+
+/* Readable form typography at every viewport size. */
+.login-card .login-form > .eyebrow { font-size: 11px; }
+.login-card h2 { font-size: clamp(28px,2.4vw,32px); line-height: 1.2; }
+.login-card .login-form > p.muted { font-size: 15px; }
+.login-card .field label { font-size: 14px; }
+.login-card input:not([type=checkbox]) { font-size: 16px; }
+.login-card .checkbox { font-size: 14px; line-height: 1.5; }
+.login-card .button { font-size: 16px; min-height: 52px; }
+.login-card .login-hint { font-size: 13px; line-height: 1.7; }
+.login-card .login-security { font-size: 12px; line-height: 1.6; }
+.login-card .field-error { font-size: 13px; }
