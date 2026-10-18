@@ -2,128 +2,98 @@
 @section('title','Paket membership')
 @section('content')
 <style>
-/* Modern "Card On Top Of Card" Design (matching reference mockup) */
+/* Modern "Card On Top Of Card" Design (Pixel-perfect reference mockup) */
 .plan-grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 26px;
     align-items: stretch;
     margin-bottom: 40px;
 }
 
-/* Base / Outer Card */
+/* Base Outer Card */
 .pricing-outer-card {
-    background: #141416;
+    background: #111113;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 32px;
-    padding: 16px 16px 28px 16px;
-    box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.7);
+    border-radius: 28px;
+    padding: 12px 12px 24px 12px;
+    box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: column;
     position: relative;
     isolation: isolate;
     color: #f4f4f5;
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .pricing-outer-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow: 0 32px 64px -14px rgba(0, 0, 0, 0.85);
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 28px 56px -12px rgba(0, 0, 0, 0.85);
 }
 
-/* Inner Floating Card (Card di Atas Card) */
+/* Inner Elevated Card (Card di Atas Card) */
 .pricing-inner-card {
-    background: linear-gradient(180deg, #27272c 0%, #1c1c20 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 24px;
-    padding: 24px 22px 20px 22px;
-    box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    background: linear-gradient(180deg, #242428 0%, #17171a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 22px 20px 20px 20px;
+    box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
     display: flex;
     flex-direction: column;
     position: relative;
-    margin-bottom: 8px;
 }
 
-/* Top Header Bar */
-.pricing-card-topbar {
+/* Baris 1 Header: Kategori / Target di kiri, Badge & Titik 3 di kanan */
+.pricing-top-meta {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 18px;
-}
-
-.pricing-title-area {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    flex: 1;
-}
-
-.pricing-title-row {
-    display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    min-height: 28px;
 }
 
-.pricing-badge-icon {
+.pricing-kicker-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #a1a1aa;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+.pricing-kicker-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #e4e4e7;
-    flex-shrink: 0;
+    color: #d4d4d8;
 }
-.pricing-badge-icon svg {
-    width: 18px;
-    height: 18px;
+.pricing-kicker-icon svg {
+    width: 16px;
+    height: 16px;
 }
-
-/* Judul Paket - Sangat Jelas, Menonjol, dan Tidak Terpotong */
-.pricing-plan-name {
-    font-size: 1.22rem;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: -0.3px;
-    line-height: 1.25;
-    margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    word-break: break-word;
+.pricing-kicker-sep {
+    color: #52525b;
 }
 
-.pricing-plan-sep {
-    color: #71717a;
-    font-size: 0.85rem;
-    font-weight: 300;
-}
-
-.pricing-plan-category {
-    font-size: 0.82rem;
-    color: #a1a1aa;
-    font-weight: 500;
-}
-
-/* Header Right: Pill & 3-Dots */
-.pricing-actions-right {
-    display: flex;
+.pricing-actions-group {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-    margin-top: -2px;
 }
 
+/* Badge Aurora Sunset Glow ("Most Popular") */
 .pricing-pill-glow {
     display: inline-flex;
     align-items: center;
-    padding: 5px 13px;
+    padding: 4px 12px;
     border-radius: 9999px;
     font-size: 0.72rem;
     font-weight: 600;
     color: #ffffff;
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(168, 85, 247, 0.5));
-    border: 1px solid rgba(244, 114, 182, 0.5);
-    box-shadow: 0 0 18px rgba(236, 72, 153, 0.3);
+    border: 1px solid rgba(244, 114, 182, 0.45);
+    box-shadow: 0 0 16px rgba(236, 72, 153, 0.28);
     white-space: nowrap;
     letter-spacing: 0.2px;
 }
@@ -131,9 +101,9 @@
 .pricing-pill-ghost {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
+    padding: 3px 9px;
     border-radius: 9999px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     background: rgba(255, 255, 255, 0.08);
     color: #d4d4d8;
@@ -141,7 +111,7 @@
     white-space: nowrap;
 }
 
-/* 3-Dots Menu */
+/* Tombol Titik 3 Vertikal */
 .pricing-menu-wrap {
     position: relative;
     display: inline-block;
@@ -150,12 +120,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.05);
-    color: #d4d4d8;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: #a1a1aa;
     cursor: pointer;
     transition: all 0.15s ease;
     padding: 0;
@@ -168,35 +138,35 @@
 .pricing-menu-btn:hover,
 .pricing-menu-btn:focus-visible {
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.18);
 }
 .pricing-dropdown-box {
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
-    min-width: 165px;
-    background: #242429;
+    min-width: 160px;
+    background: #202025;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 14px;
+    border-radius: 12px;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
-    padding: 6px;
+    padding: 5px;
     z-index: 60;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 .pricing-dropdown-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     width: 100%;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 8px 11px;
+    border-radius: 7px;
     border: 0;
     background: transparent;
     color: #e4e4e7;
-    font-size: 0.85rem;
+    font-size: 0.84rem;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
@@ -215,72 +185,87 @@
     color: #fca5a5;
 }
 .pricing-dropdown-item svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     flex-shrink: 0;
 }
 
-/* Price Big Block */
+/* Baris 2 Header: Nama Paket (Jelas, Menonjol, Bebas Wrap Rapi) */
+.pricing-plan-title {
+    font-size: 1.32rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+    margin: 0 0 16px 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    word-break: break-word;
+}
+
+/* Blok Harga */
 .pricing-price-row {
     display: flex;
     align-items: baseline;
-    gap: 4px;
-    margin: 14px 0 20px;
+    gap: 3px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
 }
 .pricing-curr-symbol {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #e4e4e7;
     align-self: flex-start;
     margin-top: 4px;
 }
 .pricing-number {
-    font-size: clamp(2.3rem, 3.4vw, 2.9rem);
+    font-size: clamp(2.3rem, 3.4vw, 2.85rem);
     font-weight: 800;
     line-height: 1;
     color: #ffffff;
-    letter-spacing: -2px;
+    letter-spacing: -1.8px;
 }
 .pricing-duration-label {
-    font-size: 0.88rem;
-    color: #9ca3af;
+    font-size: 0.85rem;
+    color: #8e8e93;
     font-weight: 500;
     margin-left: 6px;
 }
 
-/* High Contrast Pill CTA Button ("Buy" style) */
-.pricing-pill-cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 48px;
-    padding: 12px 24px;
-    border-radius: 9999px;
+/* Tombol CTA "Pilih Paket Ini" (Pure Solid White Pill) */
+.pricing-pill-cta,
+a.pricing-pill-cta {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    padding: 12px 24px !important;
+    border-radius: 9999px !important;
     background: #ffffff !important;
-    color: #0c0c0e !important;
-    font-size: 0.96rem;
-    font-weight: 700;
-    text-decoration: none;
-    border: 0;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-}
-.pricing-pill-cta:hover {
-    background: #f4f4f5 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 22px rgba(255, 255, 255, 0.22);
     color: #000000 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
 }
-.pricing-pill-cta:active {
-    transform: translateY(0);
+.pricing-pill-cta:hover,
+a.pricing-pill-cta:hover {
+    background: #f4f4f5 !important;
+    color: #000000 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 22px rgba(255, 255, 255, 0.25) !important;
+}
+.pricing-pill-cta:active,
+a.pricing-pill-cta:active {
+    transform: translateY(0) !important;
 }
 
-/* Lower Section: Feature Checklist */
+/* Bagian Bawah: Feature Checklist */
 .pricing-bottom-section {
-    padding: 14px 10px 4px 10px;
+    padding: 16px 8px 4px 8px;
     display: flex;
     flex-direction: column;
 }
@@ -288,7 +273,7 @@
 .pricing-features-wrap {
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 12px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -296,8 +281,8 @@
 .pricing-feature-row {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    font-size: 0.88rem;
+    gap: 11px;
+    font-size: 0.86rem;
     color: #d4d4d8;
     line-height: 1.45;
 }
@@ -305,8 +290,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 19px;
-    height: 19px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #27272a;
     color: #ffffff;
@@ -314,18 +299,18 @@
     margin-top: 1px;
 }
 .pricing-check-bullet svg {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
     stroke-width: 2.5;
 }
 
-/* Divider with Plus Badge */
+/* Divider Plus */
 .pricing-divider-plus {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    margin: 18px 0 14px;
+    margin: 16px 0 12px;
 }
 .pricing-divider-plus::before {
     content: '';
@@ -343,7 +328,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #1c1c20;
+    background: #19191d;
     border: 1px solid rgba(255, 255, 255, 0.14);
     color: #a1a1aa;
     font-size: 13px;
@@ -493,24 +478,20 @@ dialog.pricing-sheet-dialog::backdrop {
         <section class="pricing-outer-card">
             {{-- Inner Elevated Card (Card di Atas Card) --}}
             <div class="pricing-inner-card">
-                {{-- Header: Icon + Judul Paket Jelas + Badge + 3-Dots Action Menu --}}
-                <header class="pricing-card-topbar">
-                    <div class="pricing-title-area">
-                        <div class="pricing-title-row">
-                            <span class="pricing-badge-icon" title="{{ $plan->plan_type_label }}">
-                                <x-icon name="{{ $plan->plan_type === 'pt' ? 'users' : ($plan->plan_type === 'pilates' ? 'layers' : 'grid') }}"/>
-                            </span>
-                            <h2 class="pricing-plan-name">{{ $plan->name }}</h2>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-                            <span class="pricing-plan-category">{{ $plan->plan_type_label }}</span>
-                            <span class="pricing-plan-sep">·</span>
-                            <span class="pricing-plan-category" style="color:#71717a;">{{ $plan->duration_value }} {{ ['day'=>'hari','month'=>'bulan','year'=>'tahun'][$plan->duration_unit] }}</span>
-                        </div>
+                {{-- Baris 1: Ikon + Kategori/Durasi di kiri | Badge & Titik 3 di kanan --}}
+                <div class="pricing-top-meta">
+                    <div class="pricing-kicker-group">
+                        <span class="pricing-kicker-icon" title="{{ $plan->plan_type_label }}">
+                            <x-icon name="{{ $plan->plan_type === 'pt' ? 'users' : ($plan->plan_type === 'pilates' ? 'layers' : 'grid') }}"/>
+                        </span>
+                        <span>{{ $plan->plan_type_label }}</span>
+                        <span class="pricing-kicker-sep">·</span>
+                        <span style="color:#71717a;">{{ $plan->duration_value }} {{ ['day'=>'hari','month'=>'bulan','year'=>'tahun'][$plan->duration_unit] }}</span>
                     </div>
 
-                    <div class="pricing-actions-right">
-                        @if($plan->plan_type === 'pt' || $loop->first)
+                    <div class="pricing-actions-group">
+                        {{-- Hanya paket pertama (unggulan) yang mendapat badge "Paling Populer" agar tidak redundant --}}
+                        @if($loop->first)
                             <span class="pricing-pill-glow">Paling Populer</span>
                         @elseif(!$plan->is_active)
                             <span class="pricing-pill-ghost" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">Nonaktif</span>
@@ -535,16 +516,19 @@ dialog.pricing-sheet-dialog::backdrop {
                             </div>
                         </details>
                     </div>
-                </header>
+                </div>
 
-                {{-- Big Price Typography --}}
+                {{-- Baris 2: Judul Paket (Sangat Jelas, Penuh, Tebal & Menonjol) --}}
+                <h2 class="pricing-plan-title">{{ $plan->name }}</h2>
+
+                {{-- Big Price Row --}}
                 <div class="pricing-price-row">
                     <span class="pricing-curr-symbol">Rp</span>
                     <span class="pricing-number">{{ number_format($plan->price_idr, 0, ',', '.') }}</span>
                     <span class="pricing-duration-label">/ {{ $plan->duration_value }} {{ ['day'=>'hari','month'=>'bulan','year'=>'tahun'][$plan->duration_unit] }}</span>
                 </div>
 
-                {{-- High Contrast Pill CTA Button ("Buy" style) --}}
+                {{-- High Contrast Pure White Pill CTA Button --}}
                 <a href="{{ route('members.new', ['plan_id' => $plan->id]) }}" class="pricing-pill-cta">
                     Pilih Paket Ini
                 </a>
@@ -577,7 +561,7 @@ dialog.pricing-sheet-dialog::backdrop {
                     </li>
                 </ul>
 
-                {{-- Optional Divider with Plus for Extra Benefit / Description --}}
+                {{-- Divider Plus for Extra Benefit / Description --}}
                 @if($plan->description)
                     <div class="pricing-divider-plus">
                         <span class="pricing-plus-badge">+</span>
