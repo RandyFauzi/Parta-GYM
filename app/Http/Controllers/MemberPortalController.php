@@ -113,6 +113,17 @@ class MemberPortalController extends Controller
         return view('member.receipt', compact('member', 'invoice') + ['payment' => Payment::where('invoice_id', $invoice->id)->first()]);
     }
 
+    public function progress(Request $request): View
+    {
+        $member = $this->member($request);
+        $records = $member->progressRecords()->with('trainer', 'session')->paginate(10);
+
+        return view('member.progress', [
+            'member' => $member,
+            'records' => $records,
+        ]);
+    }
+
     public function password(Request $request, MembershipService $service): RedirectResponse
     {
         $data = $request->validate(['current_password' => 'required|string|current_password', 'password' => 'required|string|min:12|max:128|confirmed']);

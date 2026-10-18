@@ -3,10 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -27,6 +29,18 @@ class User extends Authenticatable
     public function trainerProfile(): HasOne
     {
         return $this->hasOne(TrainerProfile::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(StaffAttendance::class)->latest('date');
+    }
+
+    public function todayAttendance(): HasOne
+    {
+        $today = CarbonImmutable::now(config('gym.timezone'))->toDateString();
+
+        return $this->hasOne(StaffAttendance::class)->where(fn ($query) => $query->where('date', $today)->orWhere(fn ($open) => $open->whereNotNull('clock_in_at')->whereNull('clock_out_at')))->oldest('date');
     }
 
     protected $attributes = ['role' => 'member', 'is_active' => true];

@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\StaffShift;
 use App\Models\User;
 use App\Services\MembershipService;
+use App\Services\WhatsAppService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,7 +25,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GymController extends Controller
 {
-    public function __construct(private MembershipService $service) {}
+    public function __construct(
+        private MembershipService $service,
+        private WhatsAppService $whatsapp
+    ) {}
 
     public function home(Request $r): RedirectResponse
     {
@@ -63,34 +67,84 @@ class GymController extends Controller
             $days[] = ['date' => $day->format('d M'), 'amount' => $trend[$day->format('Y-m-d')] ?? 0];
         }
 
-        return view('gym.dashboard', compact('stats', 'days', 'from', 'to') + ['recent' => Payment::with('invoice.member')->latest('paid_at')->limit(5)->get(), 'expiring' => Member::with('currentPeriod.invoice')->whereHas('currentPeriod', fn ($q) => $q->where('ends_at', '<=', now()->addDays(7)))->limit(5)->get()]);
+        return view('gym.dashboard', compact('stats', 'days', 'from', 'to') + [
+            'recent' => Payment::with('invoice.member')->latest('paid_at')->limit(5)->get(),
+            'expiring' => Member::with('currentPeriod.invoice')->whereHas('currentPeriod', fn ($q) => $q->where('ends_at', '<=', now()->addDays(7)))->limit(5)->get(),
+            'whatsapp' => $this->whatsapp,
+        ]);
     }
 
     private function search(Request $r): Builder
     {
-        $r->validate(['q' => 'nullable|string|max:100', 'status' => 'nullable|in:active,expired,suspended']);
+        $r->validate([
+            'q' => 'nullable|string|max:100',
+            'status' => 'nullable|in:active,expired,suspended',
+            'customer_type' => 'nullable|in:member,non_member,student',
+        ]);
 
-        return Member::with('currentPeriod.invoice')->when($r->filled('q'), function ($q) use ($r) {
-            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $r->q).'%';
-            $q->where(fn ($q) => $q->where('full_name', 'like', $term)->orWhere('member_number', 'like', $term)->orWhere('phone', 'like', $term)->when(preg_match('/^[0-9]{12,20}$/D', (string) $r->q), fn ($barcodeQuery) => $barcodeQuery->orWhere('user_id', ltrim($r->q, '0') ?: '0')));
-        })->when($r->status === 'active', fn ($q) => $q->where('status', 'active')->whereHas('currentPeriod'))->when($r->status === 'expired', fn ($q) => $q->whereDoesntHave('currentPeriod'))->when($r->status === 'suspended', fn ($q) => $q->where('status', 'suspended'));
+        return Member::with('currentPeriod.invoice')
+            ->when($r->filled('q'), function ($q) use ($r) {
+                $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $r->q).'%';
+                $q->where(fn ($q) => $q->where('full_name', 'like', $term)->orWhere('member_number', 'like', $term)->orWhere('phone', 'like', $term)->when(preg_match('/^[0-9]{12,20}$/D', (string) $r->q), fn ($barcodeQuery) => $barcodeQuery->orWhere('user_id', ltrim($r->q, '0') ?: '0')));
+            })
+            ->when($r->status === 'active', fn ($q) => $q->where('status', 'active')->whereHas('currentPeriod'))
+            ->when($r->status === 'expired', fn ($q) => $q->whereDoesntHave('currentPeriod'))
+            ->when($r->status === 'suspended', fn ($q) => $q->where('status', 'suspended'))
+            ->when($r->filled('customer_type'), fn ($q) => $q->where('customer_type', $r->customer_type));
     }
 
     public function members(Request $r): View
     {
-        return view('gym.members', ['members' => $this->search($r)->latest()->paginate(15)->withQueryString()]);
+        $counts = [
+            'all' => Member::count(),
+            'member' => Member::where('customer_type', 'member')->count(),
+            'student' => Member::where('customer_type', 'student')->count(),
+            'non_member' => Member::where('customer_type', 'non_member')->count(),
+        ];
+
+        return view('gym.members', [
+            'members' => $this->search($r)->latest()->paginate(15)->withQueryString(),
+            'counts' => $counts,
+            'whatsapp' => $this->whatsapp,
+        ]);
     }
 
-    public function newMember(): View
+    public function newMember(Request $r): View
     {
-        return view('gym.member-form', ['plans' => MembershipPlan::where('is_active', true)->get()]);
+        $r->validate(['search_returning' => 'nullable|string|max:100']);
+        $returningMembers = collect();
+        if ($r->filled('search_returning')) {
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $r->search_returning).'%';
+            $phoneTerm = preg_match('/^[+0-9 ()-]+$/D', $r->search_returning) ? '%'.$this->whatsapp->formatPhone($r->search_returning).'%' : $term;
+            $returningMembers = Member::with('currentPeriod.invoice')
+                ->where(function ($q) use ($term, $phoneTerm) {
+                    $q->where('full_name', 'like', $term)
+                        ->orWhere('phone', 'like', $phoneTerm)
+                        ->orWhere('member_number', 'like', $term);
+                })
+                ->limit(5)
+                ->get();
+        }
+
+        return view('gym.member-form', [
+            'plans' => MembershipPlan::where('is_active', true)->get(),
+            'returningMembers' => $returningMembers,
+        ]);
     }
 
     public function storeMember(MemberRequest $r): RedirectResponse
     {
         $member = DB::transaction(function () use ($r) {
             $data = $r->validated();
-            $member = Member::create(['full_name' => $data['full_name'], 'phone' => $data['phone'], 'email' => $data['email'] ?? null, 'member_number' => 'PG-'.strtoupper(Str::random(8))]);
+            $member = Member::create([
+                'full_name' => $data['full_name'],
+                'phone' => $data['phone'],
+                'email' => $data['email'] ?? null,
+                'customer_type' => $data['customer_type'] ?? 'member',
+                'student_id_number' => $data['student_id_number'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'member_number' => 'PG-'.strtoupper(Str::random(8)),
+            ]);
             if ($r->filled('plan_id')) {
                 $invoice = $this->service->createInvoice($member, MembershipPlan::findOrFail($data['plan_id']), $data['request_key']);
                 if (($data['payment_status'] ?? 'pending') === 'paid') {
@@ -112,12 +166,18 @@ class GymController extends Controller
 
     public function member(Member $member): View
     {
-        return view('gym.member', ['member' => $member->load('currentPeriod.invoice', 'periods.invoice'), 'plans' => MembershipPlan::where('is_active', true)->get(), 'invoices' => $member->invoices()->latest()->get(), 'visits' => $member->checkins()->latest('checked_in_at')->limit(20)->get()]);
+        return view('gym.member', [
+            'member' => $member->load('currentPeriod.invoice', 'periods.invoice', 'progressRecords.trainer', 'progressRecords.session'),
+            'plans' => MembershipPlan::where('is_active', true)->get(),
+            'invoices' => $member->invoices()->latest()->get(),
+            'visits' => $member->checkins()->latest('checked_in_at')->limit(20)->get(),
+            'whatsapp' => $this->whatsapp,
+        ]);
     }
 
     public function updateMember(MemberRequest $r, Member $member): RedirectResponse
     {
-        $member->update($r->safe()->only(['full_name', 'phone', 'email']));
+        $member->update($r->safe()->only(['full_name', 'phone', 'email', 'customer_type', 'student_id_number', 'notes']));
         $this->service->audit('member.updated', $member->id);
 
         return back()->with('success', 'Profil diperbarui.');
@@ -133,7 +193,10 @@ class GymController extends Controller
 
     public function payments(): View
     {
-        return view('gym.payments', ['invoices' => Invoice::with('member', 'payment')->latest()->paginate(15)]);
+        return view('gym.payments', [
+            'invoices' => Invoice::with('member', 'payment')->latest()->paginate(15),
+            'whatsapp' => $this->whatsapp,
+        ]);
     }
 
     public function pay(Request $r, Invoice $invoice): RedirectResponse
@@ -146,7 +209,13 @@ class GymController extends Controller
 
     public function checkinPage(Request $r): View
     {
-        return view('gym.checkin', ['members' => $r->filled('q') ? $this->search($r)->limit(12)->get() : collect(), 'recent' => Checkin::with('member')->latest('checked_in_at')->limit(10)->get()]);
+        $day = CarbonImmutable::now(config('gym.timezone'))->startOfDay();
+
+        return view('gym.checkin', [
+            'members' => $r->filled('q') ? $this->search($r)->withCount(['checkins as today_checkins' => fn ($query) => $query->where('checked_in_at', '>=', $day->utc())->where('checked_in_at', '<', $day->addDay()->utc())])->withMax('checkins', 'checked_in_at')->limit(12)->get() : collect(),
+            'recent' => Checkin::with('member')->latest('checked_in_at')->limit(10)->get(),
+            'whatsapp' => $this->whatsapp,
+        ]);
     }
 
     public function checkin(Request $r, Member $member): RedirectResponse
@@ -238,7 +307,11 @@ class GymController extends Controller
     {
         abort_unless(in_array($r->user()->role, ['owner', 'receptionist'], true) || $invoice->member->user_id === $r->user()->id, 403);
 
-        return view('gym.receipt', ['invoice' => $invoice->load('member'), 'payment' => Payment::where('invoice_id', $invoice->id)->first()]);
+        return view('gym.receipt', [
+            'invoice' => $invoice->load('member'),
+            'payment' => Payment::where('invoice_id', $invoice->id)->first(),
+            'whatsapp' => $this->whatsapp,
+        ]);
     }
 
     public function reports(Request $r): View

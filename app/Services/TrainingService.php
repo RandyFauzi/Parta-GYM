@@ -47,6 +47,9 @@ class TrainingService
                 if ($data['capacity'] < $filled) {
                     throw ValidationException::withMessages(['capacity' => 'Kapasitas tidak boleh lebih kecil dari jumlah peserta.']);
                 }
+                if ($filled > 0 && ($current->kind !== $data['kind'] || $current->activity !== $data['activity'])) {
+                    throw ValidationException::withMessages(['kind' => 'Jenis kelas dengan peserta tidak dapat diganti. Batalkan dan buat jadwal pengganti.']);
+                }
                 if ($filled > 0 && (! $current->starts_at->equalTo($start) || ! $current->ends_at->equalTo($end))) {
                     throw ValidationException::withMessages(['starts_at' => 'Sesi sudah memiliki peserta. Batalkan sesi dengan alasan dan buat jadwal baru untuk perubahan waktu.']);
                 }
@@ -97,7 +100,21 @@ class TrainingService
             if ($conflict) {
                 throw ValidationException::withMessages(['member_id' => 'Anggota sudah terdaftar pada sesi lain di waktu ini.']);
             }
-            $enrollment = ClassEnrollment::updateOrCreate(['training_session_id' => $session->id, 'member_id' => $member->id], ['created_by' => $actor->id, 'status' => 'confirmed', 'attended_at' => null, 'recorded_by' => null]);
+            $period = null;
+            if ($session->kind === 'personal') {
+                $periods = $member->periods()->whereIn('plan_type', ['pt', 'all_access'])->where('status', 'active')->where('starts_at', '<=', $session->starts_at)->where('ends_at', '>', $session->starts_at)->orderBy('ends_at')->lockForUpdate()->get();
+                foreach ($periods as $candidate) {
+                    $reserved = ClassEnrollment::where('membership_period_id', $candidate->id)->whereIn('status', ['confirmed', 'attended', 'no_show'])->count();
+                    if ($candidate->visit_limit === null || $reserved < $candidate->visit_limit) {
+                        $period = $candidate;
+                        break;
+                    }
+                }
+                if (! $period) {
+                    throw ValidationException::withMessages(['member_id' => 'Paket PT tidak aktif pada jadwal ini atau sisa sesi sudah habis.']);
+                }
+            }
+            $enrollment = ClassEnrollment::updateOrCreate(['training_session_id' => $session->id, 'member_id' => $member->id], ['created_by' => $actor->id, 'membership_period_id' => $period?->id, 'status' => 'confirmed', 'attended_at' => null, 'recorded_by' => null]);
             app(MembershipService::class)->audit('class.enrolled', $enrollment->id);
         }, 3);
     }

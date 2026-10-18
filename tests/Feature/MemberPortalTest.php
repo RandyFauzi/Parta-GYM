@@ -126,6 +126,6 @@ class MemberPortalTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['role' => 'receptionist']));
         $this->get('/member/membership')->assertForbidden();
-        $this->post('/member/renewals',[])->assertForbidden();
+        $this->post('/member/renewals', [])->assertForbidden();
     }
 }

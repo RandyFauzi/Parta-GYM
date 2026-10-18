@@ -40,7 +40,7 @@ class MembershipService
             if (! $subscription) {
                 DB::table('subscriptions')->insert(['id' => $subscriptionId, 'member_id' => $member->id, 'plan_id' => $plan->id, 'status' => 'pending', 'created_at' => now(), 'updated_at' => now()]);
             }
-            $invoice = Invoice::create(['invoice_number' => 'INV-'.now()->format('ymd').'-'.strtoupper(Str::random(8)), 'member_id' => $member->id, 'subscription_id' => $subscriptionId, 'total_idr' => $plan->price_idr, 'snapshot' => ['name' => $plan->name, 'duration_unit' => $plan->duration_unit, 'duration_value' => $plan->duration_value, 'visit_limit' => $plan->visit_limit, 'price_idr' => $plan->price_idr], 'request_key' => $key]);
+            $invoice = Invoice::create(['invoice_number' => 'INV-'.now()->format('ymd').'-'.strtoupper(Str::random(8)), 'member_id' => $member->id, 'subscription_id' => $subscriptionId, 'total_idr' => $plan->price_idr, 'snapshot' => ['name' => $plan->name, 'plan_type' => $plan->plan_type, 'duration_unit' => $plan->duration_unit, 'duration_value' => $plan->duration_value, 'visit_limit' => $plan->visit_limit, 'price_idr' => $plan->price_idr], 'request_key' => $key]);
             $this->audit('invoice.created', $invoice->id);
 
             return $invoice;
@@ -70,13 +70,14 @@ class MembershipService
                 }
             }
             Payment::create(['invoice_id' => $invoice->id, 'staff_id' => $staff->id, 'staff_shift_id' => $shift?->id, 'amount_idr' => $invoice->total_idr, 'method' => $method, 'reference' => $reference, 'paid_at' => now()]);
-            $latest = MembershipPeriod::where('member_id', $invoice->member_id)->where('status', 'active')->max('ends_at');
+            $planType = $invoice->snapshot['plan_type'] ?? 'gym';
+            $latest = MembershipPeriod::where('member_id', $invoice->member_id)->where('plan_type', $planType)->where('status', 'active')->max('ends_at');
             $start = CarbonImmutable::now(config('gym.timezone'));
             if ($latest && CarbonImmutable::parse($latest, 'UTC')->greaterThan($start)) {
                 $start = CarbonImmutable::parse($latest, 'UTC')->setTimezone(config('gym.timezone'));
             }
             $end = $this->periodEnd($start, $invoice->snapshot['duration_unit'], $invoice->snapshot['duration_value']);
-            MembershipPeriod::create(['member_id' => $invoice->member_id, 'subscription_id' => $invoice->subscription_id, 'source_invoice_id' => $invoice->id, 'starts_at' => $start->utc(), 'ends_at' => $end->utc(), 'visit_limit' => $invoice->snapshot['visit_limit'], 'status' => 'active']);
+            MembershipPeriod::create(['member_id' => $invoice->member_id, 'subscription_id' => $invoice->subscription_id, 'source_invoice_id' => $invoice->id, 'starts_at' => $start->utc(), 'ends_at' => $end->utc(), 'visit_limit' => $invoice->snapshot['visit_limit'], 'plan_type' => $planType, 'status' => 'active']);
             $invoice->update(['status' => 'paid']);
             DB::table('subscriptions')->where('id', $invoice->subscription_id)->update(['status' => 'active', 'updated_at' => now()]);
             $this->audit('payment.confirmed', $invoice->id, ['method' => $method, 'amount_idr' => $invoice->total_idr]);
@@ -97,7 +98,7 @@ class MembershipService
             DB::table('checkin_attempts')->insert(['member_id' => $member->id, 'staff_id' => $staff->id, 'result' => $reason ?? 'SUCCESS', 'attempted_at' => now()]);
             if (! $reason) {
                 $checkin = Checkin::create(['member_id' => $member->id, 'membership_period_id' => $period->id, 'staff_id' => $staff->id, 'checked_in_at' => now(), 'method' => 'manual']);
-                $this->audit('checkin.created',$checkin->id);
+                $this->audit('checkin.created', $checkin->id);
             }
 
             return $reason;

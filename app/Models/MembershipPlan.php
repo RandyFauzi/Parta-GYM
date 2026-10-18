@@ -10,10 +10,47 @@ class MembershipPlan extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['name', 'description', 'duration_unit', 'duration_value', 'visit_limit', 'price_idr', 'is_active'];
+    public const TYPE_GYM = 'gym';
+
+    public const TYPE_PT = 'pt';
+
+    public const TYPE_PILATES = 'pilates';
+
+    public const TYPE_ALL_ACCESS = 'all_access';
+
+    protected $fillable = [
+        'name',
+        'plan_type',
+        'description',
+        'duration_unit',
+        'duration_value',
+        'visit_limit',
+        'price_idr',
+        'is_active',
+    ];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'price_idr' => 'integer', 'duration_value' => 'integer', 'visit_limit' => 'integer'];
+        return [
+            'is_active' => 'boolean',
+            'price_idr' => 'integer',
+            'duration_value' => 'integer',
+            'visit_limit' => 'integer',
+        ];
+    }
+
+    public function isPersonalTraining(): bool
+    {
+        return $this->plan_type === self::TYPE_PT;
+    }
+
+    public function getPlanTypeLabelAttribute(): string
+    {
+        return match ($this->plan_type) {
+            self::TYPE_PT => 'Personal Training (PT)',
+            self::TYPE_PILATES => 'Pilates Studio',
+            self::TYPE_ALL_ACCESS => 'All-Access (Gym + PT/Pilates)',
+            default => 'Gym Reguler',
+        };
     }
 }

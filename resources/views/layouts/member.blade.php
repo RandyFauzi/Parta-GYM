@@ -21,7 +21,8 @@
         @foreach($navigation as [$route,$icon,$label])
         <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><x-icon :name="$icon"/><span>{{ $label }}</span></a>
         @endforeach
-        <a href="{{ route('portal.visits') }}"><x-icon name="scan"/><span>Kunjungan</span></a>
+        <a href="{{ route('portal.progress') }}" @if(request()->routeIs('portal.progress')) aria-current="page" @endif><x-icon name="chart"/><span>Progres PT</span></a>
+        <a href="{{ route('portal.visits') }}" @if(request()->routeIs('portal.visits')) aria-current="page" @endif><x-icon name="scan"/><span>Kunjungan</span></a>
         <a href="{{ route('classes') }}" @if(request()->routeIs('classes','classes.*')) aria-current="page" @endif><x-icon name="layers"/><span>Kelas</span></a>
     </nav>
     <div class="m-rail-note"><x-icon name="gym"/><p>Informasi gym Anda,<br>dalam satu tempat.</p></div>

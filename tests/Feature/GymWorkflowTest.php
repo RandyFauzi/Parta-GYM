@@ -194,7 +194,7 @@ class GymWorkflowTest extends TestCase
 
     public function test_negative_price_and_unauthorized_plan_changes_rejected(): void
     {
-        $this->actingAs($this->staff())->post('/admin/membership-plans',['name' => 'Bad', 'duration_unit' => 'month', 'duration_value' => 1, 'price_idr' => -1, 'is_active' => 1])->assertSessionHasErrors('price_idr');
-        $this->actingAs($this->staff('receptionist'))->post('/admin/membership-plans',[])->assertForbidden();
+        $this->actingAs($this->staff())->post('/admin/membership-plans', ['name' => 'Bad', 'duration_unit' => 'month', 'duration_value' => 1, 'price_idr' => -1, 'is_active' => 1])->assertSessionHasErrors('price_idr');
+        $this->actingAs($this->staff('receptionist'))->post('/admin/membership-plans', [])->assertForbidden();
     }
 }
