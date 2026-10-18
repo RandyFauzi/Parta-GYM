@@ -2,90 +2,117 @@
 @section('title','Paket membership')
 @section('content')
 <style>
-/* Modern Reference Pricing Cards */
+/* Modern "Card On Top Of Card" Design (matching reference mockup) */
 .plan-grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 28px;
+    gap: 30px;
     align-items: stretch;
     margin-bottom: 40px;
 }
 
-.pricing-card-box {
-    background: linear-gradient(180deg, #18181b 0%, #121214 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* Base / Outer Card */
+.pricing-outer-card {
+    background: #141416;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 32px;
-    padding: 32px 28px;
-    box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    padding: 16px 16px 28px 16px;
+    box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: column;
     position: relative;
     isolation: isolate;
     color: #f4f4f5;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease, box-shadow 0.22s ease;
 }
-.pricing-card-box:hover {
-    transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+.pricing-outer-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 32px 64px -14px rgba(0, 0, 0, 0.85);
 }
 
-/* Card Header */
+/* Inner Floating Card (Card di Atas Card) */
+.pricing-inner-card {
+    background: linear-gradient(180deg, #27272c 0%, #1c1c20 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 24px 22px 20px 22px;
+    box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+/* Top Header Bar */
 .pricing-card-topbar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    min-height: 36px;
+    margin-bottom: 18px;
 }
-.pricing-card-left {
+
+.pricing-title-area {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.pricing-title-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 0;
+    flex-wrap: wrap;
 }
-.pricing-card-icon-wrap {
+
+.pricing-badge-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #d4d4d8;
+    color: #e4e4e7;
     flex-shrink: 0;
 }
-.pricing-card-icon-wrap svg {
-    width: 17px;
-    height: 17px;
+.pricing-badge-icon svg {
+    width: 18px;
+    height: 18px;
 }
-.pricing-card-title {
-    font-size: 1.08rem;
-    font-weight: 700;
+
+/* Judul Paket - Sangat Jelas, Menonjol, dan Tidak Terpotong */
+.pricing-plan-name {
+    font-size: 1.22rem;
+    font-weight: 800;
     color: #ffffff;
-    letter-spacing: -0.2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    letter-spacing: -0.3px;
+    line-height: 1.25;
     margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    word-break: break-word;
 }
-.pricing-card-sep {
-    color: #52525b;
+
+.pricing-plan-sep {
+    color: #71717a;
     font-size: 0.85rem;
     font-weight: 300;
 }
-.pricing-card-target {
+
+.pricing-plan-category {
     font-size: 0.82rem;
-    color: #8e8e93;
+    color: #a1a1aa;
     font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* Header Right: Pill & 3-Dots */
-.pricing-card-right {
+.pricing-actions-right {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+    margin-top: -2px;
 }
+
 .pricing-pill-glow {
     display: inline-flex;
     align-items: center;
@@ -94,12 +121,13 @@
     font-size: 0.72rem;
     font-weight: 600;
     color: #ffffff;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.45), rgba(168, 85, 247, 0.45));
-    border: 1px solid rgba(244, 114, 182, 0.45);
-    box-shadow: 0 0 16px rgba(236, 72, 153, 0.28);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(168, 85, 247, 0.5));
+    border: 1px solid rgba(244, 114, 182, 0.5);
+    box-shadow: 0 0 18px rgba(236, 72, 153, 0.3);
     white-space: nowrap;
     letter-spacing: 0.2px;
 }
+
 .pricing-pill-ghost {
     display: inline-flex;
     align-items: center;
@@ -113,7 +141,7 @@
     white-space: nowrap;
 }
 
-/* 3-Dots Dropdown Menu */
+/* 3-Dots Menu */
 .pricing-menu-wrap {
     position: relative;
     display: inline-block;
@@ -126,8 +154,8 @@
     height: 32px;
     border-radius: 8px;
     border: 1px solid transparent;
-    background: transparent;
-    color: #a1a1aa;
+    background: rgba(255, 255, 255, 0.05);
+    color: #d4d4d8;
     cursor: pointer;
     transition: all 0.15s ease;
     padding: 0;
@@ -140,18 +168,18 @@
 .pricing-menu-btn:hover,
 .pricing-menu-btn:focus-visible {
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.18);
 }
 .pricing-dropdown-box {
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
     min-width: 165px;
-    background: #202025;
+    background: #242429;
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 14px;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
     padding: 6px;
     z-index: 60;
     display: flex;
@@ -192,32 +220,31 @@
     flex-shrink: 0;
 }
 
-/* Price Big Typography */
-.pricing-big-price {
+/* Price Big Block */
+.pricing-price-row {
     display: flex;
     align-items: baseline;
-    gap: 3px;
-    margin: 26px 0 24px;
+    gap: 4px;
+    margin: 14px 0 20px;
     flex-wrap: wrap;
 }
 .pricing-curr-symbol {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: #e4e4e7;
-    margin-right: 2px;
     align-self: flex-start;
     margin-top: 4px;
 }
 .pricing-number {
-    font-size: clamp(2.4rem, 3.6vw, 3rem);
+    font-size: clamp(2.3rem, 3.4vw, 2.9rem);
     font-weight: 800;
     line-height: 1;
     color: #ffffff;
     letter-spacing: -2px;
 }
-.pricing-duration-text {
+.pricing-duration-label {
     font-size: 0.88rem;
-    color: #8e8e93;
+    color: #9ca3af;
     font-weight: 500;
     margin-left: 6px;
 }
@@ -228,35 +255,40 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 50px;
+    min-height: 48px;
     padding: 12px 24px;
     border-radius: 9999px;
     background: #ffffff !important;
     color: #0c0c0e !important;
-    font-size: 0.98rem;
+    font-size: 0.96rem;
     font-weight: 700;
     text-decoration: none;
     border: 0;
     cursor: pointer;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-    margin-bottom: 26px;
 }
 .pricing-pill-cta:hover {
     background: #f4f4f5 !important;
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.22);
+    box-shadow: 0 6px 22px rgba(255, 255, 255, 0.22);
     color: #000000 !important;
 }
 .pricing-pill-cta:active {
     transform: translateY(0);
 }
 
-/* Checklist Features */
+/* Lower Section: Feature Checklist */
+.pricing-bottom-section {
+    padding: 14px 10px 4px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
 .pricing-features-wrap {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 13px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -273,8 +305,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 19px;
+    height: 19px;
     border-radius: 50%;
     background: #27272a;
     color: #ffffff;
@@ -287,13 +319,13 @@
     stroke-width: 2.5;
 }
 
-/* Divider with Plus Badge (matching reference) */
+/* Divider with Plus Badge */
 .pricing-divider-plus {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    margin: 20px 0 16px;
+    margin: 18px 0 14px;
 }
 .pricing-divider-plus::before {
     content: '';
@@ -308,13 +340,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #202024;
+    background: #1c1c20;
     border: 1px solid rgba(255, 255, 255, 0.14);
     color: #a1a1aa;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1;
 }
@@ -389,7 +421,7 @@ dialog.pricing-sheet-dialog::backdrop {
     background: rgba(0, 0, 0, 0.15);
 }
 
-/* Desktop View (Centered) */
+/* Desktop Modal View (Centered) */
 @media (min-width: 769px) {
     dialog.pricing-sheet-dialog {
         margin: auto;
@@ -401,7 +433,7 @@ dialog.pricing-sheet-dialog::backdrop {
     }
 }
 
-/* Mobile View: Bottom Sheet Tab */
+/* Mobile View: Bottom Sheet Tab Drawer */
 @media (max-width: 768px) {
     dialog.pricing-sheet-dialog {
         position: fixed;
@@ -457,94 +489,105 @@ dialog.pricing-sheet-dialog::backdrop {
 
 <div class="plan-grid-container">
     @foreach($plans as $plan)
-        <section class="pricing-card-box">
-            {{-- Header: Icon + Titles + Badge + 3-Dots Action Menu --}}
-            <header class="pricing-card-topbar">
-                <div class="pricing-card-left">
-                    <span class="pricing-card-icon-wrap" title="{{ $plan->plan_type_label }}">
-                        <x-icon name="{{ $plan->plan_type === 'pt' ? 'users' : ($plan->plan_type === 'pilates' ? 'layers' : 'grid') }}"/>
-                    </span>
-                    <h2 class="pricing-card-title" title="{{ $plan->name }}">{{ $plan->name }}</h2>
-                    <span class="pricing-card-sep">|</span>
-                    <span class="pricing-card-target">{{ $plan->plan_type_label }}</span>
-                </div>
-
-                <div class="pricing-card-right">
-                    @if($plan->plan_type === 'pt' || $loop->first)
-                        <span class="pricing-pill-glow">Paling Populer</span>
-                    @elseif(!$plan->is_active)
-                        <span class="pricing-pill-ghost" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">Nonaktif</span>
-                    @endif
-
-                    {{-- 3-Dots Vertical Action Menu --}}
-                    <details class="pricing-menu-wrap" data-plan-menu>
-                        <summary class="pricing-menu-btn" aria-label="Menu paket {{ $plan->name }}" title="Opsi paket">
-                            <x-icon name="more-vertical"/>
-                        </summary>
-                        <div class="pricing-dropdown-box">
-                            <button type="button" class="pricing-dropdown-item" onclick="openPlanModal('modal-edit-{{ $plan->id }}'); this.closest('details').removeAttribute('open');">
-                                <x-icon name="edit"/> Edit Paket
-                            </button>
-                            <form action="{{ route('plans.destroy', $plan) }}" method="post" onsubmit="return confirm('Hapus / nonaktifkan paket {{ $plan->name }}?')" style="margin:0;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="pricing-dropdown-item is-danger">
-                                    <x-icon name="trash"/> Hapus Paket
-                                </button>
-                            </form>
+        {{-- Base / Outer Card --}}
+        <section class="pricing-outer-card">
+            {{-- Inner Elevated Card (Card di Atas Card) --}}
+            <div class="pricing-inner-card">
+                {{-- Header: Icon + Judul Paket Jelas + Badge + 3-Dots Action Menu --}}
+                <header class="pricing-card-topbar">
+                    <div class="pricing-title-area">
+                        <div class="pricing-title-row">
+                            <span class="pricing-badge-icon" title="{{ $plan->plan_type_label }}">
+                                <x-icon name="{{ $plan->plan_type === 'pt' ? 'users' : ($plan->plan_type === 'pilates' ? 'layers' : 'grid') }}"/>
+                            </span>
+                            <h2 class="pricing-plan-name">{{ $plan->name }}</h2>
                         </div>
-                    </details>
-                </div>
-            </header>
+                        <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+                            <span class="pricing-plan-category">{{ $plan->plan_type_label }}</span>
+                            <span class="pricing-plan-sep">·</span>
+                            <span class="pricing-plan-category" style="color:#71717a;">{{ $plan->duration_value }} {{ ['day'=>'hari','month'=>'bulan','year'=>'tahun'][$plan->duration_unit] }}</span>
+                        </div>
+                    </div>
 
-            {{-- Big Price Area --}}
-            <div class="pricing-big-price">
-                <span class="pricing-curr-symbol">Rp</span>
-                <span class="pricing-number">{{ number_format($plan->price_idr, 0, ',', '.') }}</span>
-                <span class="pricing-duration-text">/ {{ $plan->duration_value }} {{ ['day'=>'hari','month'=>'bulan','year'=>'tahun'][$plan->duration_unit] }}</span>
+                    <div class="pricing-actions-right">
+                        @if($plan->plan_type === 'pt' || $loop->first)
+                            <span class="pricing-pill-glow">Paling Populer</span>
+                        @elseif(!$plan->is_active)
+                            <span class="pricing-pill-ghost" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">Nonaktif</span>
+                        @endif
+
+                        {{-- 3-Dots Vertical Action Menu --}}
+                        <details class="pricing-menu-wrap" data-plan-menu>
+                            <summary class="pricing-menu-btn" aria-label="Menu paket {{ $plan->name }}" title="Opsi paket">
+                                <x-icon name="more-vertical"/>
+                            </summary>
+                            <div class="pricing-dropdown-box">
+                                <button type="button" class="pricing-dropdown-item" onclick="openPlanModal('modal-edit-{{ $plan->id }}'); this.closest('details').removeAttribute('open');">
+                                    <x-icon name="edit"/> Edit Paket
+                                </button>
+                                <form action="{{ route('plans.destroy', $plan) }}" method="post" onsubmit="return confirm('Hapus / nonaktifkan paket {{ $plan->name }}?')" style="margin:0;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="pricing-dropdown-item is-danger">
+                                        <x-icon name="trash"/> Hapus Paket
+                                    </button>
+                                </form>
+                            </div>
+                        </details>
+                    </div>
+                </header>
+
+                {{-- Big Price Typography --}}
+                <div class="pricing-price-row">
+                    <span class="pricing-curr-symbol">Rp</span>
+                    <span class="pricing-number">{{ number_format($plan->price_idr, 0, ',', '.') }}</span>
+                    <span class="pricing-duration-label">/ {{ $plan->duration_value }} {{ ['day'=>'hari','month'=>'bulan','year'=>'tahun'][$plan->duration_unit] }}</span>
+                </div>
+
+                {{-- High Contrast Pill CTA Button ("Buy" style) --}}
+                <a href="{{ route('members.new', ['plan_id' => $plan->id]) }}" class="pricing-pill-cta">
+                    Pilih Paket Ini
+                </a>
             </div>
 
-            {{-- High Contrast Action Button (Pure White Pill) --}}
-            <a href="{{ route('members.new', ['plan_id' => $plan->id]) }}" class="pricing-pill-cta">
-                Pilih Paket Ini
-            </a>
-
-            {{-- Feature Checklist List --}}
-            <ul class="pricing-features-wrap">
-                <li class="pricing-feature-row">
-                    <span class="pricing-check-bullet"><x-icon name="check"/></span>
-                    <span>{{ $plan->visit_limit ? 'Kuota '.$plan->visit_limit.' Sesi Latihan' : 'Akses Tanpa Batas Sesi' }}</span>
-                </li>
-                <li class="pricing-feature-row">
-                    <span class="pricing-check-bullet"><x-icon name="check"/></span>
-                    <span>Masa Aktif: {{ $plan->duration_value }} {{ ['day'=>'Hari','month'=>'Bulan','year'=>'Tahun'][$plan->duration_unit] }}</span>
-                </li>
-                <li class="pricing-feature-row">
-                    <span class="pricing-check-bullet"><x-icon name="check"/></span>
-                    <span>Kategori Fasilitas: {{ $plan->plan_type_label }}</span>
-                </li>
-                @if($plan->plan_type === 'pt')
+            {{-- Bottom Section (Inside Outer Card): Feature Checklist --}}
+            <div class="pricing-bottom-section">
+                <ul class="pricing-features-wrap">
                     <li class="pricing-feature-row">
                         <span class="pricing-check-bullet"><x-icon name="check"/></span>
-                        <span>Pendampingan Personal Trainer 1-on-1</span>
+                        <span>{{ $plan->visit_limit ? 'Kuota '.$plan->visit_limit.' Sesi Latihan' : 'Akses Tanpa Batas Sesi' }}</span>
                     </li>
-                @endif
-                <li class="pricing-feature-row">
-                    <span class="pricing-check-bullet"><x-icon name="check"/></span>
-                    <span>Status: {{ $plan->is_active ? 'Aktif & Siap Digunakan' : 'Nonaktif' }}</span>
-                </li>
-            </ul>
+                    <li class="pricing-feature-row">
+                        <span class="pricing-check-bullet"><x-icon name="check"/></span>
+                        <span>Masa Aktif: {{ $plan->duration_value }} {{ ['day'=>'Hari','month'=>'Bulan','year'=>'Tahun'][$plan->duration_unit] }}</span>
+                    </li>
+                    <li class="pricing-feature-row">
+                        <span class="pricing-check-bullet"><x-icon name="check"/></span>
+                        <span>Kategori Fasilitas: {{ $plan->plan_type_label }}</span>
+                    </li>
+                    @if($plan->plan_type === 'pt')
+                        <li class="pricing-feature-row">
+                            <span class="pricing-check-bullet"><x-icon name="check"/></span>
+                            <span>Pendampingan Personal Trainer 1-on-1</span>
+                        </li>
+                    @endif
+                    <li class="pricing-feature-row">
+                        <span class="pricing-check-bullet"><x-icon name="check"/></span>
+                        <span>Status: {{ $plan->is_active ? 'Aktif & Siap Digunakan' : 'Nonaktif' }}</span>
+                    </li>
+                </ul>
 
-            {{-- Optional Divider with Plus for Extra Benefit / Description --}}
-            @if($plan->description)
-                <div class="pricing-divider-plus">
-                    <span class="pricing-plus-badge">+</span>
-                </div>
-                <div class="pricing-feature-row" style="color:#a1a1aa;font-size:0.83rem;">
-                    <span class="pricing-check-bullet" style="background:rgba(255,255,255,0.08);"><x-icon name="check"/></span>
-                    <span>{{ $plan->description }}</span>
-                </div>
-            @endif
+                {{-- Optional Divider with Plus for Extra Benefit / Description --}}
+                @if($plan->description)
+                    <div class="pricing-divider-plus">
+                        <span class="pricing-plus-badge">+</span>
+                    </div>
+                    <div class="pricing-feature-row" style="color:#a1a1aa;font-size:0.83rem;">
+                        <span class="pricing-check-bullet" style="background:rgba(255,255,255,0.08);"><x-icon name="check"/></span>
+                        <span>{{ $plan->description }}</span>
+                    </div>
+                @endif
+            </div>
 
             {{-- Edit Dialog Modal (Desktop: Center Pop-up | Mobile: Bottom Sheet Tab) --}}
             <dialog id="modal-edit-{{ $plan->id }}" class="pricing-sheet-dialog" aria-labelledby="modal-title-{{ $plan->id }}">
