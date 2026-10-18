@@ -191,11 +191,31 @@ class GymController extends Controller
         return back()->with('success', 'Invoice dibuat. Keanggotaan aktif setelah pembayaran dikonfirmasi.');
     }
 
-    public function payments(): View
+    public function payments(Request $r): View
     {
+        $query = Invoice::with('member', 'payment')->latest();
+
+        if ($r->filled('status') && in_array($r->status, ['paid', 'unpaid'], true)) {
+            $query->where('status', $r->status);
+        }
+
+        if ($r->filled('q')) {
+            $search = trim($r->q);
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('member', function ($mq) use ($search) {
+                        $mq->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('member_code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
         return view('gym.payments', [
-            'invoices' => Invoice::with('member', 'payment')->latest()->paginate(15),
+            'invoices' => $query->paginate(15)->withQueryString(),
             'whatsapp' => $this->whatsapp,
+            'currentStatus' => $r->status ?? 'all',
+            'search' => $r->q ?? '',
         ]);
     }
 
