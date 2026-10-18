@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/membership-plans', [GymController::class, 'plans'])->name('plans');
         Route::post('/membership-plans', [GymController::class, 'storePlan'])->name('plans.store');
         Route::put('/membership-plans/{plan}', [GymController::class, 'updatePlan'])->name('plans.update');
+        Route::delete('/membership-plans/{plan}', [GymController::class, 'destroyPlan'])->name('plans.destroy');
         Route::get('/reports', [GymController::class, 'reports'])->name('reports');
         Route::get('/reports/export', [GymController::class, 'export'])->name('reports.export');
         Route::get('/audit', [GymController::class, 'audit'])->name('audit');

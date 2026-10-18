@@ -3,12 +3,12 @@
 @section('content')
 <div class="page-heading">
     <div>
-        <span class="eyebrow">DATABASE CUSTOMER &amp; ANGGOTA</span>
-        <h1>Anggota gym<span class="gold">.</span></h1>
-        <p>Kelola seluruh database pelanggan: Member Reguler, Pelajar/Student, dan Pengunjung Harian.</p>
+        <span class="eyebrow">DATABASE</span>
+        <h1>Data Anggota<span class="gold">.</span></h1>
+        <p>Database Member, Pelajar, dan Pengunjung Harian.</p>
     </div>
     <div style="display:flex;gap:8px;">
-        <a class="button" href="{{ route('members.new') }}"><x-icon name="plus"/>Daftarkan anggota</a>
+        <a class="button" href="{{ route('members.new') }}"><x-icon name="plus"/>Tambah Anggota</a>
     </div>
 </div>
 
@@ -18,13 +18,13 @@
         <strong>Semua:</strong> {{ $counts['all'] }}
     </a>
     <a href="{{ route('members', array_merge(request()->query(), ['customer_type' => 'member'])) }}" class="badge {{ request('customer_type') === 'member' ? 'positive' : 'neutral' }}" style="padding:8px 14px;font-size:0.9rem;text-decoration:none;">
-        <strong>Member Reguler:</strong> {{ $counts['member'] }}
+        <strong>Member:</strong> {{ $counts['member'] }}
     </a>
     <a href="{{ route('members', array_merge(request()->query(), ['customer_type' => 'student'])) }}" class="badge {{ request('customer_type') === 'student' ? 'positive' : 'neutral' }}" style="padding:8px 14px;font-size:0.9rem;text-decoration:none;">
-        <strong>Pelajar / Student:</strong> {{ $counts['student'] }}
+        <strong>Pelajar:</strong> {{ $counts['student'] }}
     </a>
     <a href="{{ route('members', array_merge(request()->query(), ['customer_type' => 'non_member'])) }}" class="badge {{ request('customer_type') === 'non_member' ? 'positive' : 'neutral' }}" style="padding:8px 14px;font-size:0.9rem;text-decoration:none;">
-        <strong>Non-Member / Harian:</strong> {{ $counts['non_member'] }}
+        <strong>Harian:</strong> {{ $counts['non_member'] }}
     </a>
 </div>
 

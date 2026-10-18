@@ -97,7 +97,7 @@ class StaffAttendanceTest extends TestCase
         // 1. View staff attendance dashboard
         $viewResponse = $this->get(route('staff.attendance.index'));
         $viewResponse->assertOk();
-        $viewResponse->assertSee('Absensi Karyawan &amp; Trainer', false);
+        $viewResponse->assertSee('Absensi Karyawan &amp; PT', false);
 
         // 2. Owner manually records sick/permit for coach Andi
         $tz = config('gym.timezone', 'Asia/Makassar');

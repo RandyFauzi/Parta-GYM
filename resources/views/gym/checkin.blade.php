@@ -3,29 +3,28 @@
 @section('content')
 <div class="page-heading">
     <div>
-        <span class="eyebrow">WELCOME TO THE FRONT DESK</span>
-        <h1>Siap untuk sesi berikutnya<span class="gold">?</span></h1>
-        <p>Temukan anggota, verifikasi identitas, sisa masa aktif, lalu izinkan akses gym.</p>
+        <span class="eyebrow">FRONT DESK</span>
+        <h1>Check-in Anggota<span class="gold">.</span></h1>
+        <p>Cek identitas, sisa masa aktif, dan izin akses gym.</p>
     </div>
-    <a class="button secondary" href="{{ route('members.new') }}"><x-icon name="plus"/>Anggota baru / lama</a>
+    <a class="button secondary" href="{{ route('members.new') }}"><x-icon name="plus"/>Pendaftaran</a>
 </div>
 
 <section class="panel scan-panel">
     <div class="scan-symbol"><x-icon name="scan"/></div>
-    <h2>Check-in anggota</h2>
-    <p class="muted">Cari nomor anggota, nama, atau nomor telepon.</p>
+    <h2>Check-in Anggota</h2>
+    <p class="muted">Cari nomor anggota, nama, atau WhatsApp.</p>
     <form class="scan-search" method="get">
-        <label class="sr-only" for="q">Cari anggota untuk check-in</label>
-        <input id="q" name="q" placeholder="Masukkan nomor anggota, nama, atau WhatsApp…" value="{{ request('q') }}" autofocus required maxlength="100">
-        <button class="button"><x-icon name="search"/>Temukan anggota</button>
+        <label class="sr-only" for="q">Cari anggota</label>
+        <input id="q" name="q" placeholder="Nomor anggota, nama, atau nomor WA…" value="{{ request('q') }}" autofocus required maxlength="100">
+        <button class="button"><x-icon name="search"/>Cari</button>
     </form>
     <div data-barcode-scanner>
-        <button type="button" class="button secondary" data-scan-start>Scan QR Code</button>
-        <button type="button" class="button secondary" data-scan-stop hidden>Tutup kamera</button>
+        <button type="button" class="button secondary" data-scan-start>Scan Barcode / QR</button>
+        <button type="button" class="button secondary" data-scan-stop hidden>Tutup Kamera</button>
         <video data-scan-video playsinline muted hidden></video>
         <p data-scan-feedback role="status" class="muted"></p>
     </div>
-    <small>Check-in manual · Verifikasi identitas oleh staf diperlukan</small>
 </section>
 
 @if(request()->filled('q'))
@@ -80,34 +79,34 @@
                     {{-- Proteksi Check In Ganda & Catatan Kunjungan Hari Ini --}}
                     @if($todayCheckins > 0)
                         <div style="margin-top:10px;padding:8px 12px;border-radius:6px;background:rgba(217,119,6,0.12);border:1px solid rgba(217,119,6,0.3);font-size:0.85rem;">
-                            <strong>ℹ️ Sudah check-in {{ $todayCheckins }}x hari ini.</strong>
+                            <strong>Sudah check-in {{ $todayCheckins }}x hari ini.</strong>
                             @if($lastCheckinTime)
-                                <span class="muted">(Terakhir pukul {{ $lastCheckinTime->timezone($tz)->format('H:i') }})</span>
+                                <span class="muted">(Terakhir {{ $lastCheckinTime->timezone($tz)->format('H:i') }})</span>
                             @endif
                             @if($isRecentDuplicate)
                                 <div style="color:#ef4444;font-weight:600;margin-top:4px;">
-                                    ⚠️ Peringatan: Member baru saja check-in dalam {{ config('gym.duplicate_minutes') }} menit terakhir. Check-in ulang akan ditolak.
+                                    Baru saja check-in dalam {{ config('gym.duplicate_minutes') }} menit terakhir. Check-in ulang ditolak.
                                 </div>
                             @endif
                         </div>
                     @else
-                        <small class="muted" style="display:block;margin-top:8px;">Belum ada check-in hari ini (Kunjungan pertama hari ini).</small>
+                        <small class="muted" style="display:block;margin-top:8px;">Kunjungan pertama hari ini.</small>
                     @endif
                 </div>
 
                 <form method="post" action="{{ route('checkin.store',$m) }}">
                     @csrf
                     <label class="checkbox">
-                        <input type="checkbox" name="verified" value="1" required> Identitas anggota sudah diverifikasi
+                        <input type="checkbox" name="verified" value="1" required> Identitas sesuai
                     </label>
-                    <button class="button wide">Konfirmasi check-in <x-icon name="check"/></button>
+                    <button class="button wide">Check-in <x-icon name="check"/></button>
                 </form>
 
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);">
-                    <a class="button compact secondary" href="{{ $whatsapp->getMemberPassUrl($m) }}" target="_blank" rel="noopener noreferrer" title="Kirim Kartu & Barcode Anggota ke WhatsApp">
+                    <a class="button compact secondary" href="{{ $whatsapp->getMemberPassUrl($m) }}" target="_blank" rel="noopener noreferrer" title="Kirim Kartu & Barcode ke WhatsApp">
                         Kirim Kartu WA
                     </a>
-                    <a class="text-link" href="{{ route('members.show',$m) }}">Profil &amp; perpanjangan <x-icon name="arrow"/></a>
+                    <a class="text-link" href="{{ route('members.show',$m) }}">Profil &amp; Perpanjangan <x-icon name="arrow"/></a>
                 </div>
             </section>
         @empty

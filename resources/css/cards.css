@@ -395,3 +395,421 @@ body:is(.admin-app,.staff-app,.member-app) :is(.sidebar,.member-rail) nav > a:is
 [data-barcode-scanner]{margin:20px 0}[data-scan-video]{display:block;width:min(100%,560px);border-radius:20px;margin:16px auto}[data-scan-video][hidden]{display:none}
 
 .member-pass-qr{background:#fff;color:#000;border-radius:20px;padding:20px;margin:24px 0;text-align:center}.member-pass-qr svg{display:block;width:min(100%,280px);height:auto;aspect-ratio:1;margin:0 auto}.member-pass-qr>span{display:block;margin-top:12px;font-size:14px;letter-spacing:.15em}
+
+/* Modern Pricing Cards (matching user design reference) */
+.plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    align-items: stretch;
+    margin-bottom: 32px;
+}
+
+:is(.admin-app, .staff-app) main .pricing-plan-card {
+    background: #151518 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 26px !important;
+    padding: 26px 24px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.36) !important;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+}
+:is(.admin-app, .staff-app) main .pricing-plan-card::before {
+    display: none !important;
+}
+
+/* Card Header */
+.pricing-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+.pricing-card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.pricing-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e5e7;
+    flex-shrink: 0;
+}
+.pricing-card-icon svg {
+    width: 17px;
+    height: 17px;
+}
+.pricing-card-titles {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+.pricing-card-name {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pricing-card-subtitle {
+    font-size: 0.8rem;
+    color: #8e8e93;
+    font-weight: 500;
+}
+
+/* Header Right: Badge & 3-dots Menu */
+.pricing-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.pricing-pill-popular {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: #fff;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(249, 115, 22, 0.45));
+    border: 1px solid rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.2);
+}
+.pricing-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+    color: #d1d1d6;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* 3-Dots Vertical Action Menu */
+.plan-menu-container {
+    position: relative;
+}
+.plan-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #a1a1aa;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    list-style: none;
+}
+.plan-menu-trigger::-webkit-details-marker {
+    display: none;
+}
+.plan-menu-trigger:hover,
+.plan-menu-trigger:focus-visible {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+.plan-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 170px;
+    background: #202024;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    padding: 6px;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.plan-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: #e4e4e7;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.plan-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+.plan-menu-item.danger {
+    color: #f87171;
+}
+.plan-menu-item.danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+.plan-menu-item svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* Price Block */
+.pricing-hero-price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.pricing-currency {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    align-self: flex-start;
+    margin-top: 4px;
+}
+.pricing-amount {
+    font-size: clamp(2rem, 3.2vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff;
+    letter-spacing: -1.2px;
+}
+.pricing-duration {
+    font-size: 0.88rem;
+    color: #8e8e93;
+    font-weight: 500;
+    margin-left: 2px;
+}
+
+/* CTA Buy/Select Button (High Contrast White like reference) */
+.pricing-cta-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 20px;
+    border-radius: 9999px;
+    background: #ffffff;
+    color: #111113;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    margin-bottom: 22px;
+}
+.pricing-cta-button:hover {
+    background: #f4f4f5;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+    color: #000000;
+}
+.pricing-cta-button:active {
+    transform: translateY(0);
+}
+
+/* Feature Benefits Checklist */
+.pricing-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 18px 0 0;
+    list-style: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.pricing-feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.86rem;
+    color: #d1d1d6;
+    line-height: 1.45;
+}
+.pricing-check-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.pricing-check-icon svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 2.4;
+}
+
+/* Pop-up Edit Modal / Mobile Bottom Sheet */
+dialog.plan-sheet-modal {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #f4f4f5;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: visible;
+}
+dialog.plan-sheet-modal::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.plan-modal-container {
+    background: #19191d;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+}
+
+.sheet-handle-bar {
+    display: none;
+}
+
+.plan-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.plan-modal-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+.plan-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: #a1a1aa;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.plan-modal-close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+}
+.plan-modal-body {
+    padding: 22px 24px;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+.plan-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Desktop Modal View (Centered) */
+@media (min-width: 769px) {
+    dialog.plan-sheet-modal {
+        margin: auto;
+    }
+    .plan-modal-container {
+        width: 580px;
+        max-width: 90vw;
+        border-radius: 24px;
+    }
+}
+
+/* Mobile View: Bottom Sheet Tab Drawer */
+@media (max-width: 768px) {
+    dialog.plan-sheet-modal {
+        position: fixed;
+        inset: auto 0 0 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        bottom: 0;
+    }
+    dialog.plan-sheet-modal[open] {
+        display: block;
+        animation: slideUpSheet 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideUpSheet {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+    .plan-modal-container {
+        width: 100%;
+        max-height: 88vh;
+        border-radius: 26px 26px 0 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-right: 0;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+    .sheet-handle-bar {
+        display: block;
+        width: 44px;
+        height: 5px;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.28);
+        margin: 10px auto 4px;
+    }
+    .plan-modal-header {
+        padding: 12px 20px 14px;
+    }
+    .plan-modal-body {
+        padding: 16px 20px;
+        max-height: 65vh;
+    }
+    .plan-modal-footer {
+        padding: 14px 20px;
+    }
+}

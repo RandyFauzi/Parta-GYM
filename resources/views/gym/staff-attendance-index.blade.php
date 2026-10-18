@@ -3,9 +3,9 @@
 @section('content')
 <div class="page-heading">
     <div>
-        <span class="eyebrow">OPERATIONAL WORKFORCE</span>
-        <h1>Absensi Karyawan &amp; Trainer<span class="gold">.</span></h1>
-        <p>Pantau jam masuk, kepulangan, durasi kerja, dan status kehadiran tim resepsionis &amp; Personal Trainer.</p>
+        <span class="eyebrow">OPERASIONAL</span>
+        <h1>Absensi Karyawan &amp; PT<span class="gold">.</span></h1>
+        <p>Pantau kehadiran, jam kerja, dan status staf &amp; Personal Trainer.</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
         <a class="button secondary" href="{{ route('staff.attendance.me') }}">Absensi Saya</a>
@@ -15,24 +15,24 @@
 {{-- KPI Ringkasan Kehadiran --}}
 <div class="kpi-grid" style="margin-bottom:24px;">
     <section class="kpi">
-        <div class="kpi-label">Total Staf &amp; Trainer <span class="kpi-icon"><x-icon name="users"/></span></div>
+        <div class="kpi-label">Total Staf &amp; PT <span class="kpi-icon"><x-icon name="users"/></span></div>
         <strong>{{ $stats['total_staff'] }}</strong>
         <small>Karyawan aktif</small>
     </section>
     <section class="kpi">
         <div class="kpi-label">Hadir Hari Ini <span class="kpi-icon"><x-icon name="check"/></span></div>
-        <strong style="color:#10b981;">{{ $stats['present'] }}</strong>
+        <strong style="color:#8ed7a2;">{{ $stats['present'] }}</strong>
         <small>{{ $stats['late'] }} terlambat</small>
     </section>
     <section class="kpi">
         <div class="kpi-label">Izin / Sakit <span class="kpi-icon"><x-icon name="layers"/></span></div>
         <strong>{{ $stats['sick_or_permit'] }}</strong>
-        <small>Berhalangan hadir</small>
+        <small>Izin tercatat</small>
     </section>
     <section class="kpi">
         <div class="kpi-label">Belum Absen <span class="kpi-icon"><x-icon name="clock"/></span></div>
-        <strong style="color:{{ $stats['not_clocked_in'] > 0 ? '#f59e0b' : '#9ca3af' }};">{{ $stats['not_clocked_in'] }}</strong>
-        <small>Perlu verifikasi</small>
+        <strong style="color:{{ $stats['not_clocked_in'] > 0 ? 'var(--gold)' : 'var(--muted)' }};">{{ $stats['not_clocked_in'] }}</strong>
+        <small>Perlu dicek</small>
     </section>
 </div>
 
@@ -43,7 +43,7 @@
             <input id="date" name="date" type="date" value="{{ $selectedDate }}" onchange="this.form.submit()">
         </div>
 
-        <label class="sr-only" for="role">Role Karyawan</label>
+        <label class="sr-only" for="role">Jabatan</label>
         <select id="role" name="role" onchange="this.form.submit()">
             <option value="">Semua Jabatan</option>
             <option value="receptionist" @selected(request('role')==='receptionist')>Resepsionis</option>
@@ -71,13 +71,13 @@
         <table>
             <thead>
                 <tr>
-                    <th>Karyawan / Trainer</th>
+                    <th>Staf / PT</th>
                     <th>Jabatan</th>
-                    <th>Clock In</th>
-                    <th>Clock Out</th>
-                    <th>Durasi Kerja</th>
+                    <th>Masuk</th>
+                    <th>Pulang</th>
+                    <th>Durasi</th>
                     <th>Status</th>
-                    <th>Catatan / Keterangan</th>
+                    <th>Catatan</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -100,16 +100,16 @@
                         </td>
                         <td>
                             @if($att->clock_in_at)
-                                <strong style="color:#10b981;">{{ $att->clock_in_at->timezone(config('gym.timezone'))->format('H:i') }}</strong>
+                                <strong style="color:#8ed7a2;">{{ $att->clock_in_at->timezone(config('gym.timezone'))->format('H:i') }}</strong>
                             @else
                                 <span class="muted">—</span>
                             @endif
                         </td>
                         <td>
                             @if($att->clock_out_at)
-                                <strong style="color:#f59e0b;">{{ $att->clock_out_at->timezone(config('gym.timezone'))->format('H:i') }}</strong>
+                                <strong style="color:var(--gold);">{{ $att->clock_out_at->timezone(config('gym.timezone'))->format('H:i') }}</strong>
                             @else
-                                <span class="muted">Belum Clock Out</span>
+                                <span class="muted">—</span>
                             @endif
                         </td>
                         <td>
@@ -124,7 +124,7 @@
                             <small class="muted">{{ $att->notes ?: '—' }}</small>
                         </td>
                         <td>
-                            <form action="{{ route('staff.attendance.destroy', $att) }}" method="post" onsubmit="return confirm('Hapus absensi ini?')">
+                            <form action="{{ route('staff.attendance.destroy', $att) }}" method="post" onsubmit="return confirm('Hapus data absensi ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="button compact ghost" style="color:#ef4444;padding:2px 8px;font-size:0.75rem;">Hapus</button>
@@ -133,7 +133,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="empty">Belum ada absensi tercatat pada tanggal {{ \Carbon\CarbonImmutable::parse($selectedDate)->translatedFormat('d F Y') }}.</td>
+                        <td colspan="8" class="empty">Belum ada absensi pada {{ \Carbon\CarbonImmutable::parse($selectedDate)->translatedFormat('d F Y') }}.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -147,8 +147,8 @@
 <section class="panel form-panel spaced">
     <div class="panel-heading">
         <div>
-            <h2>Input / Koreksi Absensi Manual</h2>
-            <p>Gunakan untuk mencatat izin, sakit, cuti, atau koreksi jam kerja karyawan.</p>
+            <h2>Input Presensi Manual</h2>
+            <p>Catat izin, sakit, cuti, atau koreksi jam kerja karyawan.</p>
         </div>
     </div>
 
@@ -156,9 +156,9 @@
         @csrf
         <div class="form-grid">
             <div class="field">
-                <label for="manual_user_id">Pilih Karyawan / Trainer *</label>
+                <label for="manual_user_id">Pilih Karyawan / PT *</label>
                 <select id="manual_user_id" name="user_id" required>
-                    <option value="">Pilih nama karyawan...</option>
+                    <option value="">Pilih staf...</option>
                     @foreach($eligibleStaff as $st)
                         <option value="{{ $st->id }}" @selected(old('user_id') == $st->id)>
                             {{ $st->name }} ({{ ['receptionist' => 'Resepsionis', 'personal_trainer' => 'Personal Trainer', 'owner' => 'Owner'][$st->role] ?? $st->role }})
@@ -175,11 +175,11 @@
             <div class="field">
                 <label for="manual_status">Status Kehadiran *</label>
                 <select id="manual_status" name="status" required>
-                    <option value="present">Hadir (Present)</option>
-                    <option value="late">Terlambat (Late)</option>
-                    <option value="sick">Sakit (Sick)</option>
-                    <option value="permit">Izin (Permit)</option>
-                    <option value="alpha">Alpha / Tanpa Keterangan</option>
+                    <option value="present">Hadir</option>
+                    <option value="late">Terlambat</option>
+                    <option value="sick">Sakit</option>
+                    <option value="permit">Izin</option>
+                    <option value="alpha">Alpha (Tanpa Keterangan)</option>
                 </select>
             </div>
 
@@ -194,12 +194,12 @@
             </div>
 
             <div class="field">
-                <label for="manual_notes">Catatan / Keterangan</label>
-                <input id="manual_notes" name="notes" type="text" placeholder="Contoh: Surat dokter terlampir / izin keluarga" value="{{ old('notes') }}">
+                <label for="manual_notes">Catatan / Alasan</label>
+                <input id="manual_notes" name="notes" type="text" placeholder="Contoh: Izin keluarga / sakit demam" value="{{ old('notes') }}">
             </div>
         </div>
 
-        <button class="button"><x-icon name="check"/> Simpan Data Absensi</button>
+        <button class="button"><x-icon name="check"/> Simpan Presensi</button>
     </form>
 </section>
 @endsection

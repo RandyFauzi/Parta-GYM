@@ -3,19 +3,19 @@
 @section('content')
 <div class="page-heading">
     <div>
-        <span class="eyebrow">EVALUASI PERSONAL TRAINER</span>
+        <span class="eyebrow">EVALUASI PT</span>
         <h1>Progres: {{ $member->full_name }}<span class="gold">.</span></h1>
-        <p>Sesi tanggal {{ $record->recorded_at->timezone(config('gym.timezone'))->format('d F Y, H:i') }} · Pelatih: {{ $record->trainer->name }}</p>
+        <p>Sesi {{ $record->recorded_at->timezone(config('gym.timezone'))->format('d M Y, H:i') }} &bull; PT: {{ $record->trainer->name }}</p>
     </div>
     <div style="display:flex;gap:8px;">
-        <button class="button secondary" data-print>Cetak Laporan</button>
-        <a class="button" href="{{ (auth()->user()->role==='member'?route('portal.progress'):(auth()->user()->role==='personal_trainer'?route('coaching.member',$member):route('members.show',$member))) }}">Kembali ke Profil</a>
+        <button class="button secondary" data-print>Cetak</button>
+        <a class="button" href="{{ (auth()->user()->role==='member'?route('portal.progress'):(auth()->user()->role==='personal_trainer'?route('coaching.member',$member):route('members.show',$member))) }}">Kembali</a>
     </div>
 </div>
 
 <section class="panel receipt">
     <div class="receipt-top">
-        <div class="brand">SPARTA Gym &amp; Pilates — PT Progress Report</div>
+        <div class="brand">SPARTA Gym &amp; Pilates — Laporan Progres PT</div>
         <span class="badge positive">Tercatat</span>
     </div>
 

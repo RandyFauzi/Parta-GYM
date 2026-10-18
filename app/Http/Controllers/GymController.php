@@ -248,6 +248,22 @@ class GymController extends Controller
         return back()->with('success', 'Paket diperbarui. Harga invoice sebelumnya tetap tersimpan.');
     }
 
+    public function destroyPlan(MembershipPlan $plan): RedirectResponse
+    {
+        if (DB::table('subscriptions')->where('plan_id', $plan->id)->exists()) {
+            // Jika sudah pernah dibeli anggota, nonaktifkan agar integritas riwayat invoice tetap aman
+            $plan->update(['is_active' => false]);
+            $this->service->audit('plan.deactivated', $plan->id);
+
+            return back()->with('success', 'Paket memiliki riwayat transaksi anggota, status berhasil dinonaktifkan.');
+        }
+
+        $plan->delete();
+        $this->service->audit('plan.deleted', $plan->id);
+
+        return back()->with('success', 'Paket berhasil dihapus.');
+    }
+
     public function shifts(Request $r): View
     {
         $current = StaffShift::where('active_staff_id', $r->user()->id)->first();

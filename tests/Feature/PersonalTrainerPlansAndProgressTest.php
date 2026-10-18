@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ClassEnrollment;
 use App\Models\Member;
 use App\Models\MemberProgressRecord;
+use App\Models\MembershipPlan;
 use App\Models\TrainerProfile;
 use App\Models\TrainingSession;
 use App\Models\User;
@@ -76,6 +77,40 @@ class PersonalTrainerPlansAndProgressTest extends TestCase
             'plan_type' => 'pt',
             'price_idr' => 250000,
             'visit_limit' => 10,
+        ]);
+    }
+
+    public function test_owner_can_update_and_delete_plan(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $this->actingAs($owner);
+
+        $plan = MembershipPlan::factory()->create([
+            'name' => 'Paket Trial',
+            'price_idr' => 100000,
+        ]);
+
+        // Update harga dan nama
+        $updateResponse = $this->put(route('plans.update', $plan), [
+            'name' => 'Paket Trial Update',
+            'plan_type' => 'gym',
+            'duration_unit' => 'day',
+            'duration_value' => 3,
+            'price_idr' => 125000,
+            'is_active' => 1,
+        ]);
+        $updateResponse->assertRedirect()->assertSessionHas('success');
+        $this->assertDatabaseHas('membership_plans', [
+            'id' => $plan->id,
+            'name' => 'Paket Trial Update',
+            'price_idr' => 125000,
+        ]);
+
+        // Delete plan
+        $deleteResponse = $this->delete(route('plans.destroy', $plan));
+        $deleteResponse->assertRedirect()->assertSessionHas('success');
+        $this->assertDatabaseMissing('membership_plans', [
+            'id' => $plan->id,
         ]);
     }
 

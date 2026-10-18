@@ -3,19 +3,19 @@
 @section('content')
 <div class="page-heading">
     <div>
-        <span class="eyebrow">REGISTRASI &amp; DATABASE ANGGOTA</span>
-        <h1>Daftar. Bayar. Mulai<span class="gold">.</span></h1>
-        <p>Registrasi baru, perpanjangan member lama, tiket harian (non-member), atau pelajar/mahasiswa.</p>
+        <span class="eyebrow">PENDAFTARAN</span>
+        <h1>Pendaftaran Anggota<span class="gold">.</span></h1>
+        <p>Daftar baru, perpanjangan member lama, atau tiket harian.</p>
     </div>
-    <a class="button secondary" href="{{ route('members') }}">Kembali ke anggota</a>
+    <a class="button secondary" href="{{ route('members') }}">Kembali</a>
 </div>
 
 {{-- Panel Reaktivasi Member Lama --}}
 <section class="panel spaced" style="margin-bottom: 24px;">
     <div class="panel-heading">
         <div>
-            <h2>Cari Member Lama (Reaktivasi Cepat)</h2>
-            <p>Untuk anggota yang pernah terdaftar, cari nama atau WhatsApp untuk langsung menambah paket tanpa perlu mendaftar ulang.</p>
+            <h2>Cari Member Lama</h2>
+            <p>Perpanjang paket tanpa input ulang data.</p>
         </div>
         <span class="badge neutral"><x-icon name="search"/> Member Lama</span>
     </div>
@@ -23,9 +23,9 @@
         <div class="search-box">
             <x-icon name="search"/>
             <label class="sr-only" for="search_returning">Cari nama atau telepon member lama</label>
-            <input id="search_returning" name="search_returning" value="{{ request('search_returning') }}" placeholder="Ketik nama, WhatsApp, atau nomor member (contoh: Budi / 0812...)">
+            <input id="search_returning" name="search_returning" value="{{ request('search_returning') }}" placeholder="Cari nama, WhatsApp, atau nomor anggota…">
         </div>
-        <button class="button secondary">Cari Member Lama</button>
+        <button class="button secondary">Cari</button>
         @if(request('search_returning'))
             <a class="button ghost" href="{{ route('members.new') }}">Reset</a>
         @endif
