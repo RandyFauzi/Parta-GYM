@@ -22,6 +22,9 @@ class PersonalTrainerPlansAndProgressTest extends TestCase
         $owner = User::factory()->create(['role' => 'owner']);
         $this->actingAs($owner);
 
+        $createPageResponse = $this->get(route('plans.create'));
+        $createPageResponse->assertOk()->assertSee('Buat Paket Baru');
+
         // 1. PT Full 30 Hari: Rp 700.000
         $response1 = $this->post(route('plans.store'), [
             'name' => 'PT Full 30 Hari',

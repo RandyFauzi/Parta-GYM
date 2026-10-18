@@ -8,8 +8,8 @@
         <p>Kelola harga, durasi, dan kuota sesi paket.</p>
     </div>
     <div>
-        <a href="#form-buat-paket" class="button secondary compact">
-            <x-icon name="plus"/> Buat Paket Baru
+        <a href="{{ route('plans.create') }}" class="button">
+            <x-icon name="plus"/> Tambah Paket
         </a>
     </div>
 </div>
@@ -131,31 +131,6 @@
         </section>
     @endforeach
 </div>
-
-<section id="form-buat-paket" class="panel form-panel spaced">
-    <div class="panel-heading">
-        <div>
-            <h2>Buat Paket Baru</h2>
-            <p>Atur paket Gym reguler atau paket Personal Trainer (PT).</p>
-        </div>
-    </div>
-
-    {{-- Rekomendasi Format Paket PT --}}
-    <div style="margin-bottom:20px;padding:14px 18px;border-radius:12px;background:#131315;border:1px solid var(--border);">
-        <strong style="color:var(--gold);font-size:12px;display:block;margin-bottom:6px;">Contoh Format Paket PT:</strong>
-        <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--muted);line-height:1.8;">
-            <li><strong>PT 30 Hari:</strong> Rp 700.000 (1 Bulan, tanpa batas sesi)</li>
-            <li><strong>PT 15 Sesi:</strong> Rp 500.000 (2 Bulan, kuota 15 sesi)</li>
-            <li><strong>PT 10 Sesi:</strong> Rp 250.000 (1 Bulan, kuota 10 sesi)</li>
-        </ul>
-    </div>
-
-    <form action="{{ route('plans.store') }}" method="post">
-        @csrf
-        @include('gym.plan-fields',['plan'=>null])
-        <button class="button"><x-icon name="plus"/> Tambah paket</button>
-    </form>
-</section>
 
 <script>
 function openPlanModal(modalId) {

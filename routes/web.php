@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/members/{member}/status', [StaffController::class, 'status'])->name('members.status');
         Route::get('/dashboard', [GymController::class, 'dashboard'])->name('dashboard');
         Route::get('/membership-plans', [GymController::class, 'plans'])->name('plans');
+        Route::get('/membership-plans/create', [GymController::class, 'createPlan'])->name('plans.create');
         Route::post('/membership-plans', [GymController::class, 'storePlan'])->name('plans.store');
         Route::put('/membership-plans/{plan}', [GymController::class, 'updatePlan'])->name('plans.update');
         Route::delete('/membership-plans/{plan}', [GymController::class, 'destroyPlan'])->name('plans.destroy');

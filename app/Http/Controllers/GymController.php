@@ -232,12 +232,17 @@ class GymController extends Controller
         return view('gym.plans', ['plans' => MembershipPlan::latest()->get()]);
     }
 
+    public function createPlan(): View
+    {
+        return view('gym.plan-create');
+    }
+
     public function storePlan(PlanRequest $r): RedirectResponse
     {
         $plan = MembershipPlan::create($r->validated());
         $this->service->audit('plan.created', $plan->id);
 
-        return back()->with('success', 'Paket dibuat.');
+        return redirect()->route('plans')->with('success', 'Paket membership berhasil ditambahkan.');
     }
 
     public function updatePlan(PlanRequest $r, MembershipPlan $plan): RedirectResponse
