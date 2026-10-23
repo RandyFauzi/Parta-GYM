@@ -7,6 +7,7 @@ return [
     'staff_permissions' => [
         'booking.manage' => 'Konfirmasi dan batalkan booking WA',
         'schedule.manage' => 'Kelola jadwal dan penugasan sesi',
+        'memberships.change' => 'Ganti paket dan catat selisih pembayaran',
         'assignments.manage' => 'Tetapkan dan ganti PT member',
     ],
     'currency' => 'IDR',

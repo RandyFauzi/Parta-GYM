@@ -4,9 +4,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GymController;
 use App\Http\Controllers\MemberPortalController;
 use App\Http\Controllers\MemberProgressController;
+use App\Http\Controllers\MembershipChangeController;
+use App\Http\Controllers\OperationalSettingsController;
 use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TrainerAssignmentController;
+use App\Http\Controllers\TrainerAvailabilityController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +95,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/staff/clock-in', [StaffAttendanceController::class, 'clockIn'])->name('staff.clock-in');
     Route::post('/staff/clock-out', [StaffAttendanceController::class, 'clockOut'])->name('staff.clock-out');
     Route::get('/staff/attendance', [StaffAttendanceController::class, 'myAttendance'])->name('staff.attendance.me');
+    Route::get('/staff/attendance/{attendance}/photo/{phase}', [StaffAttendanceController::class, 'photo'])->whereIn('phase', ['clock_in', 'clock_out'])->middleware('role:owner,receptionist,personal_trainer')->name('staff.attendance.photo');
+    Route::get('/trainer-availability', [TrainerAvailabilityController::class, 'index'])->middleware('role:owner,receptionist,personal_trainer')->name('trainer-availability');
+    Route::middleware(['role:owner,receptionist', 'can:schedule.manage'])->group(function () {
+        Route::put('/trainer-availability/{trainer}', [TrainerAvailabilityController::class, 'update'])->name('trainer-availability.update');
+        Route::post('/trainer-availability/{trainer}/time-off', [TrainerAvailabilityController::class, 'timeOff'])->name('trainer-time-off.store');
+        Route::delete('/trainer-time-off/{timeOff}', [TrainerAvailabilityController::class, 'destroy'])->name('trainer-time-off.destroy');
+    });
+    Route::middleware('role:owner')->group(function () {
+        Route::get('/admin/operating-hours', [OperationalSettingsController::class, 'index'])->name('operating-hours');
+        Route::put('/admin/operating-hours', [OperationalSettingsController::class, 'update'])->name('operating-hours.update');
+    });
+    Route::post('/frontdesk/visits/{checkin}/checkout', [OperationalSettingsController::class, 'checkout'])->middleware('role:owner,receptionist')->name('checkout.store');
+    Route::middleware(['role:owner,receptionist', 'can:memberships.change'])->group(function () {
+        Route::get('/members/{member}/package-changes', [MembershipChangeController::class, 'create'])->name('membership-changes.create');
+        Route::post('/members/{member}/package-changes', [MembershipChangeController::class, 'store'])->name('membership-changes.store');
+    });
     Route::middleware('role:member')->group(function () {
         Route::get('/member/check-in', [MemberPortalController::class, 'card'])->name('portal.card');
         Route::get('/member', [MemberPortalController::class, 'home'])->name('portal');

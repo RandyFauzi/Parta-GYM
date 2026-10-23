@@ -16,6 +16,8 @@ use App\Services\MembershipService;
 use App\Services\TrainingService;
 use App\Services\WhatsAppService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -103,15 +105,16 @@ class OperationalAuditTest extends TestCase
 
     public function test_staff_cannot_overwrite_approved_sick_leave_and_can_close_overnight_shift(): void
     {
+        Storage::fake('attendance');
         $user = User::factory()->create(['role' => 'receptionist']);
         $this->actingAs($user);
         $this->travelTo(now()->timezone(config('gym.timezone'))->startOfDay()->addHours(23));
-        $this->post(route('staff.clock-in'))->assertSessionHas('success');
+        $this->post(route('staff.clock-in'), ['photo' => UploadedFile::fake()->image('in.jpg', 640, 480)])->assertSessionHas('success');
         $this->travel(2)->hours();
-        $this->post(route('staff.clock-out'))->assertSessionHas('success');
+        $this->post(route('staff.clock-out'), ['photo' => UploadedFile::fake()->image('out.jpg', 640, 480)])->assertSessionHas('success');
         $this->assertNotNull(StaffAttendance::firstOrFail()->clock_out_at);
         StaffAttendance::create(['user_id' => $user->id, 'date' => now()->timezone(config('gym.timezone'))->toDateString(), 'status' => 'sick', 'recorded_by' => $user->id]);
-        $this->post(route('staff.clock-in'))->assertSessionHas('error');
+        $this->post(route('staff.clock-in'), ['photo' => UploadedFile::fake()->image('in.jpg', 640, 480)])->assertSessionHas('error');
         $this->assertDatabaseHas('staff_attendances', ['user_id' => $user->id, 'status' => 'sick', 'clock_in_at' => null]);
     }
 

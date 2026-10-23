@@ -4,7 +4,8 @@
 <div class="page-heading"><div><span class="eyebrow">GYM & PILATES</span><h1>{{ auth()->user()->role==='personal_trainer'?'Jadwal saya':'Kelas' }}<span class="gold">.</span></h1><p>Jadwal latihan, kapasitas peserta, dan penugasan trainer.</p></div>
 @can('schedule.manage')<a class="button" href="{{ route('classes.create') }}"><x-icon name="plus"/>Jadwalkan kelas</a>
 @endcan</div>
-<form id="class-filters" class="class-filters" method="get"><div class="field"><label for="class-date">Tanggal</label><input id="class-date" type="date" name="date" value="{{ request('date') }}"></div><select name="activity" aria-label="Aktivitas"><option value="">Gym & Pilates</option><option value="gym" @selected(request('activity')==='gym')>Gym</option><option value="pilates" @selected(request('activity')==='pilates')>Pilates</option></select>
+@if(auth()->user()->can('schedule.manage') || auth()->user()->role==='personal_trainer')<p><a class="button secondary" href="{{ route('trainer-availability') }}">Lihat ketersediaan PT</a></p>@endif
+<form id="class-filters"  class="class-filters" method="get"><div class="field"><label for="class-date">Tanggal</label><input id="class-date" type="date" name="date" value="{{ request('date') }}"></div><select name="activity" aria-label="Aktivitas"><option value="">Gym & Pilates</option><option value="gym" @selected(request('activity')==='gym')>Gym</option><option value="pilates" @selected(request('activity')==='pilates')>Pilates</option></select>
 @if(auth()->user()->role!=='member')<select name="status" aria-label="Status kelas"><option value="">Semua status</option>
 @foreach(['scheduled'=>'Terjadwal','completed'=>'Selesai','cancelled'=>'Dibatalkan'] as $value=>$label)<option value="{{ $value }}" @selected(request('status')===$value)>{{ $label }}</option>
 @endforeach</select>

@@ -37,13 +37,13 @@
             <div>
                 <small style="color:var(--muted);display:block;margin-bottom:4px;font-size:11px;">Masuk (Clock In)</small>
                 <strong style="font-size:20px;letter-spacing:-0.5px;color:{{ $todayRecord?->clock_in_at ? '#8ed7a2' : 'var(--muted)' }};">
-                    {{ $todayRecord?->clock_in_at ? $todayRecord->clock_in_at->timezone(config('gym.timezone', 'Asia/Makassar'))->format('H:i') . ' WITA' : '--:--' }}
+                    {{ $todayRecord?->clock_in_at ? $todayRecord->clock_in_at->timezone(config('gym.timezone', 'Asia/Makassar'))->format('H:i') . ' '.config('gym.timezone') : '--:--' }}
                 </strong>
             </div>
             <div>
                 <small style="color:var(--muted);display:block;margin-bottom:4px;font-size:11px;">Pulang (Clock Out)</small>
                 <strong style="font-size:20px;letter-spacing:-0.5px;color:{{ $todayRecord?->clock_out_at ? 'var(--gold)' : 'var(--muted)' }};">
-                    {{ $todayRecord?->clock_out_at ? $todayRecord->clock_out_at->timezone(config('gym.timezone', 'Asia/Makassar'))->format('H:i') . ' WITA' : '--:--' }}
+                    {{ $todayRecord?->clock_out_at ? $todayRecord->clock_out_at->timezone(config('gym.timezone', 'Asia/Makassar'))->format('H:i') . ' '.config('gym.timezone') : '--:--' }}
                 </strong>
             </div>
         </div>
@@ -60,17 +60,22 @@
             </div>
         @endif
 
+        @if($todayRecord)
+            @include('gym.attendance-evidence', ['attendance' => $todayRecord])
+        @endif
         <div>
             @if(! $todayRecord || ! $todayRecord->clock_in_at)
-                <form method="post" action="{{ route('staff.clock-in') }}" style="margin:0;">
+                <form method="post" action="{{ route('staff.clock-in') }}" enctype="multipart/form-data" style="margin:0;">
                     @csrf
+                    @include('gym.attendance-camera', ['phase' => !$todayRecord?->clock_in_at ? 'clock_in' : 'clock_out'])
                     <button class="button" type="submit" style="width:100%;">
                         <x-icon name="check"/> Clock In
                     </button>
                 </form>
             @elseif(! $todayRecord->clock_out_at)
-                <form method="post" action="{{ route('staff.clock-out') }}" style="margin:0;">
+                <form method="post" action="{{ route('staff.clock-out') }}" enctype="multipart/form-data" style="margin:0;">
                     @csrf
+                    @include('gym.attendance-camera', ['phase' => !$todayRecord?->clock_in_at ? 'clock_in' : 'clock_out'])
                     <button class="button secondary" type="submit" style="width:100%;border-color:var(--gold);color:var(--gold);">
                         <x-icon name="clock"/> Clock Out
                     </button>

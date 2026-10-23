@@ -38,6 +38,14 @@ return [
             'report' => false,
         ],
 
+        'attendance' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/attendance'),
+            'visibility' => 'private',
+            'serve' => false,
+            'throw' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

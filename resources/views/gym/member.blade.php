@@ -178,6 +178,8 @@
     </details>
 @endif
 
+@can('memberships.change')<p><a class="button secondary" href="{{ route('membership-changes.create', $member) }}">Ubah paket member</a></p>@endcan
 @include('gym.trainer-assignments')
 @include('gym.periods')
+<section class="panel form-panel spaced"><h2>Kredit member</h2><strong>Rp {{ number_format($member->credit_balance_idr,0,',','.') }}</strong><p>Kredit dari penyesuaian paket dapat dipakai pada perubahan paket berikutnya melalui management.</p></section>
 @endsection

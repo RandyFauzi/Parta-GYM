@@ -170,3 +170,62 @@ if (userForm) {
  role.addEventListener('change', syncUserRole);
  syncUserRole();
 }
+
+document.querySelectorAll('[data-attendance-camera]').forEach(widget => {
+ const video = widget.querySelector('video');
+ const preview = widget.querySelector('[data-photo-preview]');
+ const input = widget.querySelector('input[type=file]');
+ const start = widget.querySelector('[data-photo-start]');
+ const capture = widget.querySelector('[data-photo-capture]');
+ const stop = widget.querySelector('[data-photo-stop]');
+ const feedback = widget.querySelector('[data-photo-feedback]');
+ let stream, generation = 0, previewUrl;
+ const close = () => {
+  generation++;
+  stream?.getTracks().forEach(track => track.stop());
+  stream = null; video.srcObject = null; video.hidden = true;
+  stop.hidden = true; capture.hidden = true; start.disabled = false;
+ };
+ const showPreview = file => {
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  if (!file) { preview.hidden = true; return; }
+  previewUrl = URL.createObjectURL(file);
+  preview.src = previewUrl; preview.hidden = false;
+  feedback.textContent = 'Foto siap dikirim. Waktu absensi dan cap foto ditentukan server.';
+ };
+ input.addEventListener('change', () => { close(); showPreview(input.files[0]); });
+ stop.addEventListener('click', close);
+ window.addEventListener('pagehide', close);
+ document.addEventListener('visibilitychange', () => { if (document.hidden) close(); });
+ start.addEventListener('click', async () => {
+  close(); input.value = ''; showPreview(null);
+  const attempt = generation;
+  start.disabled = true;
+  try {
+   if (!navigator.mediaDevices?.getUserMedia) throw new Error('unavailable');
+   const acquired = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
+   if (attempt !== generation) { acquired.getTracks().forEach(track => track.stop()); return; }
+   stream = acquired; video.srcObject = stream; video.hidden = false;
+   await video.play();
+   if (attempt !== generation) return;
+   capture.hidden = false; stop.hidden = false;
+   feedback.textContent = 'Arahkan kamera ke wajah, lalu tekan Ambil foto.';
+  } catch {
+   close(); feedback.textContent = 'Kamera tidak tersedia atau izin ditolak. Gunakan pilihan foto, atau hubungi management untuk pencatatan manual.';
+  }
+ });
+ capture.addEventListener('click', () => {
+  if (!video.videoWidth || !stream) return;
+  const attempt = generation;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(blob => {
+   if (!blob || attempt !== generation) return;
+   const transfer = new DataTransfer();
+   transfer.items.add(new File([blob], 'attendance.jpg', {type:'image/jpeg'}));
+   input.files = transfer.files;
+   close(); showPreview(input.files[0]);
+  }, 'image/jpeg', 0.88);
+ });
+});

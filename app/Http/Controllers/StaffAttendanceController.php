@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AttendancePhotoRequest;
 use App\Models\StaffAttendance;
 use App\Models\User;
+use App\Services\AttendancePhotoService;
 use App\Services\MembershipService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class StaffAttendanceController extends Controller
 {
@@ -86,42 +91,65 @@ class StaffAttendanceController extends Controller
         ]);
     }
 
-    public function clockIn(Request $request): RedirectResponse
+    public function clockIn(AttendancePhotoRequest $request): RedirectResponse
     {
-        $user = $request->user();
-        abort_unless(in_array($user->role, ['owner', 'receptionist', 'personal_trainer'], true), 403);
-
-        return DB::transaction(function () use ($user) {
-            User::whereKey($user->id)->lockForUpdate()->firstOrFail();
-            $today = CarbonImmutable::now(config('gym.timezone'))->toDateString();
-            $open = StaffAttendance::where('user_id', $user->id)->whereNotNull('clock_in_at')->whereNull('clock_out_at')->lockForUpdate()->first();
-            $existing = StaffAttendance::where('user_id', $user->id)->where('date', $today)->lockForUpdate()->first();
-            if ($open || $existing) {
-                return back()->with('error', 'Absensi sudah tercatat atau shift sebelumnya belum ditutup. Hubungi owner untuk koreksi.');
-            }
-            $record = StaffAttendance::create(['user_id' => $user->id, 'date' => $today, 'clock_in_at' => now(), 'status' => 'present', 'recorded_by' => $user->id]);
-            $this->membershipService->audit('staff.clock_in', $record->id);
-
-            return back()->with('success', 'Clock In berhasil.');
-        }, 3);
+        return $this->recordPhotoAttendance($request, 'clock_in');
     }
 
-    public function clockOut(Request $request): RedirectResponse
+    public function clockOut(AttendancePhotoRequest $request): RedirectResponse
     {
-        $user = $request->user();
-        abort_unless(in_array($user->role, ['owner', 'receptionist', 'personal_trainer'], true), 403);
+        return $this->recordPhotoAttendance($request, 'clock_out');
+    }
 
-        return DB::transaction(function () use ($user) {
-            User::whereKey($user->id)->lockForUpdate()->firstOrFail();
-            $record = StaffAttendance::where('user_id', $user->id)->whereNotNull('clock_in_at')->whereNull('clock_out_at')->orderBy('date')->lockForUpdate()->first();
-            if (! $record) {
-                return back()->with('error', 'Tidak ada Clock In yang masih terbuka.');
+    private function recordPhotoAttendance(AttendancePhotoRequest $request, string $phase): RedirectResponse
+    {
+        $path = null;
+        try {
+            return DB::transaction(function () use ($request, $phase, &$path): RedirectResponse {
+                $user = $request->user();
+                User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+                $timestamp = CarbonImmutable::now();
+                $today = $timestamp->timezone(config('gym.timezone'))->toDateString();
+                $open = StaffAttendance::where('user_id', $user->id)->whereNotNull('clock_in_at')->whereNull('clock_out_at')->orderBy('date')->lockForUpdate()->first();
+                if ($phase === 'clock_in') {
+                    if ($open || StaffAttendance::where('user_id', $user->id)->where('date', $today)->exists()) {
+                        return back()->with('error', 'Absensi sudah tercatat atau shift sebelumnya belum ditutup. Hubungi owner untuk koreksi.');
+                    }
+                } elseif (! $open) {
+                    return back()->with('error', 'Tidak ada Clock In yang masih terbuka.');
+                }
+                $evidence = app(AttendancePhotoService::class)->store($request->file('photo'), $user->id, $phase, $timestamp);
+                $path = $evidence['path'];
+                $data = [
+                    $phase.'_at' => $timestamp, $phase.'_evidence_at' => $timestamp,
+                    $phase.'_photo_path' => $path, $phase.'_photo_sha256' => $evidence['sha256'],
+                ];
+                if ($phase === 'clock_in') {
+                    $record = StaffAttendance::create($data + ['user_id' => $user->id, 'date' => $today, 'status' => 'present', 'recorded_by' => $user->id]);
+                } else {
+                    $record = $open;
+                    $record->update($data);
+                }
+                $this->membershipService->audit('staff.'.$phase, $record->id, ['evidence_at' => $timestamp->toIso8601String(), 'photo_sha256' => $evidence['sha256']]);
+
+                return back()->with('success', ($phase === 'clock_in' ? 'Clock In' : 'Clock Out').' berhasil dengan foto timestamp server.');
+            });
+        } catch (Throwable $exception) {
+            if ($path) {
+                Storage::disk('attendance')->delete($path);
             }
-            $record->update(['clock_out_at' => now()]);
-            $this->membershipService->audit('staff.clock_out', $record->id);
+            throw $exception;
+        }
+    }
 
-            return back()->with('success', 'Clock Out berhasil. Total jam kerja: '.$record->work_duration_formatted.'.');
-        }, 3);
+    public function photo(Request $request, StaffAttendance $attendance, string $phase): BinaryFileResponse
+    {
+        abort_unless($request->user()->role === 'owner' || $attendance->user_id === $request->user()->id, 403);
+        abort_unless(in_array($phase, ['clock_in', 'clock_out'], true), 404);
+        $path = $attendance->{$phase.'_photo_path'};
+        abort_unless($path && Storage::disk('attendance')->exists($path), 404);
+
+        return response()->file(Storage::disk('attendance')->path($path), ['Cache-Control' => 'private, no-store']);
     }
 
     public function manualStore(Request $request): RedirectResponse
@@ -162,6 +190,11 @@ class StaffAttendanceController extends Controller
             if ($clockIn && StaffAttendance::where('user_id', $data['user_id'])->where('date', '!=', $data['date'])->whereNotNull('clock_in_at')->where('clock_in_at', '<', $clockOut ?? now())->where(fn ($query) => $query->whereNull('clock_out_at')->orWhere('clock_out_at', '>', $clockIn))->exists()) {
                 throw ValidationException::withMessages(['clock_in_time' => 'Jam kerja berbenturan dengan catatan absensi lain.']);
             }
+            $existing = StaffAttendance::where('user_id', $data['user_id'])->where('date', $data['date'])->first();
+            if (($existing?->clock_in_photo_path || $existing?->clock_out_photo_path) && empty($data['notes'])) {
+                throw ValidationException::withMessages(['notes' => 'Alasan koreksi wajib diisi untuk absensi dengan bukti foto.']);
+            }
+            $before = $existing?->only(['clock_in_at', 'clock_out_at', 'status', 'notes']);
             StaffAttendance::updateOrCreate(
                 ['user_id' => $data['user_id'], 'date' => $data['date']],
                 [
@@ -175,7 +208,10 @@ class StaffAttendanceController extends Controller
 
             $this->membershipService->audit('staff.attendance_manual', (string) $data['user_id'], [
                 'date' => $data['date'],
-                'status' => $data['status'],
+                'status' => $data['status'], 'before' => $before, 'after' => [
+                    'clock_in_at' => $clockIn?->toIso8601String(), 'clock_out_at' => $clockOut?->toIso8601String(),
+                    'status' => $data['status'], 'notes' => $data['notes'] ?? null,
+                ],
             ]);
 
         }, 3);
@@ -188,6 +224,11 @@ class StaffAttendanceController extends Controller
         abort_unless($request->user()->role === 'owner', 403);
 
         DB::transaction(function () use ($attendance) {
+            User::whereKey($attendance->user_id)->lockForUpdate()->firstOrFail();
+            $attendance = StaffAttendance::whereKey($attendance->id)->lockForUpdate()->firstOrFail();
+            if ($attendance->clock_in_photo_path || $attendance->clock_out_photo_path) {
+                throw ValidationException::withMessages(['attendance' => 'Absensi dengan bukti foto tidak dapat dihapus. Gunakan koreksi manual agar bukti tetap tersimpan.']);
+            }
             $userId = $attendance->user_id;
             $date = $attendance->date->toDateString();
             $attendance->delete();

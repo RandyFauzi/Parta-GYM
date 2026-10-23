@@ -115,6 +115,7 @@
     </div>
 @endif
 
+@if(auth()->user()->role==='owner')<p><a class="button secondary" href="{{ route('operating-hours') }}">Atur jam tutup Gym</a></p>@endif
 <section class="panel spaced">
     <div class="panel-heading">
         <div>
@@ -130,7 +131,7 @@
                     <th>Anggota</th>
                     <th>Nomor anggota</th>
                     <th>Kategori</th>
-                    <th>Waktu check-in</th>
+                    <th>Waktu check-in</th><th>Checkout</th>
                 </tr>
             </thead>
             <tbody>
@@ -140,10 +141,11 @@
                         <td>{{ $v->member->member_number }}</td>
                         <td><span class="badge neutral" style="font-size:0.75rem;">{{ $v->member->customer_type_label }}</span></td>
                         <td>{{ $v->checked_in_at->timezone(config('gym.timezone'))->format('d M Y · H:i') }}</td>
+                        <td>@if($v->checked_out_at){{ $v->checked_out_at->timezone(config('gym.timezone'))->format('d M Y H:i') }}<small>{{ $v->checkout_method==='automatic'?'Otomatis saat tutup':'Dicatat staf' }}</small>@else<form method="post" action="{{ route('checkout.store', $v) }}">@csrf<button class="button compact secondary">Checkout</button></form><small>{{ $v->checkout_due_at ? 'Otomatis: '.$v->checkout_due_at->timezone(config('gym.timezone'))->format('d M H:i') : 'Batas otomatis belum diatur' }}</small>@endif</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="empty">Belum ada check-in. Kunjungan berikutnya akan tercatat di sini.</td>
+                        <td colspan="5" class="empty">Belum ada check-in. Kunjungan berikutnya akan tercatat di sini.</td>
                     </tr>
                 @endforelse
             </tbody>

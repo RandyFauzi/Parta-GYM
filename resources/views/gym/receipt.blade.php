@@ -66,4 +66,7 @@
         <p class="muted">Invoice belum dibayar. Hubungi front desk untuk menyelesaikan pembayaran.</p>
     @endif
 </section>
+@if(isset($invoice->snapshot['adjustment']))
+<section class="panel form-panel spaced"><h2>Penyesuaian paket</h2><p>Harga paket Rp {{ number_format($invoice->snapshot['price_idr'],0,',','.') }} · Kredit diterapkan Rp {{ number_format($invoice->snapshot['adjustment']['applied_credit_idr'],0,',','.') }} · Selisih dibayar Rp {{ number_format($invoice->total_idr,0,',','.') }}</p><p>Kredit tersimpan Rp {{ number_format($invoice->snapshot['adjustment']['wallet_after_idr'],0,',','.') }}. Tidak ada refund tunai otomatis.</p></section>
+@endif
 @endsection

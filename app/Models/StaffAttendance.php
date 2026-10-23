@@ -29,6 +29,9 @@ class StaffAttendance extends Model
         'status',
         'notes',
         'recorded_by',
+        'clock_in_photo_path', 'clock_out_photo_path',
+        'clock_in_photo_sha256', 'clock_out_photo_sha256',
+        'clock_in_evidence_at', 'clock_out_evidence_at',
     ];
 
     protected function casts(): array
@@ -37,6 +40,8 @@ class StaffAttendance extends Model
             'date' => 'immutable_date:Y-m-d',
             'clock_in_at' => 'immutable_datetime',
             'clock_out_at' => 'immutable_datetime',
+            'clock_in_evidence_at' => 'immutable_datetime',
+            'clock_out_evidence_at' => 'immutable_datetime',
         ];
     }
 

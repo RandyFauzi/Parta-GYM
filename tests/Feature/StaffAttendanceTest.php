@@ -6,6 +6,8 @@ use App\Models\StaffAttendance;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StaffAttendanceTest extends TestCase
@@ -14,6 +16,7 @@ class StaffAttendanceTest extends TestCase
 
     public function test_staff_can_clock_in_and_clock_out_successfully(): void
     {
+        Storage::fake('attendance');
         $trainer = User::factory()->create([
             'role' => 'personal_trainer',
             'name' => 'Coach Budi',
@@ -22,7 +25,7 @@ class StaffAttendanceTest extends TestCase
         $this->actingAs($trainer);
 
         // 1. Clock In
-        $clockInResponse = $this->post(route('staff.clock-in'));
+        $clockInResponse = $this->post(route('staff.clock-in'), ['photo' => UploadedFile::fake()->image('in.jpg', 640, 480)]);
         $clockInResponse->assertRedirect()->assertSessionHas('success');
 
         $tz = config('gym.timezone', 'Asia/Makassar');
@@ -39,11 +42,11 @@ class StaffAttendanceTest extends TestCase
         $this->assertNull($attendance->clock_out_at);
 
         // 2. Prevent duplicate clock in
-        $dupResponse = $this->post(route('staff.clock-in'));
+        $dupResponse = $this->post(route('staff.clock-in'), ['photo' => UploadedFile::fake()->image('in.jpg', 640, 480)]);
         $dupResponse->assertRedirect()->assertSessionHas('error');
 
         // 3. Clock Out
-        $clockOutResponse = $this->post(route('staff.clock-out'));
+        $clockOutResponse = $this->post(route('staff.clock-out'), ['photo' => UploadedFile::fake()->image('out.jpg', 640, 480)]);
         $clockOutResponse->assertRedirect()->assertSessionHas('success');
 
         $attendance->refresh();
@@ -51,7 +54,7 @@ class StaffAttendanceTest extends TestCase
         $this->assertNotNull($attendance->work_duration_human);
 
         // 4. Prevent duplicate clock out
-        $dupOut = $this->post(route('staff.clock-out'));
+        $dupOut = $this->post(route('staff.clock-out'), ['photo' => UploadedFile::fake()->image('out.jpg', 640, 480)]);
         $dupOut->assertRedirect()->assertSessionHas('error');
     }
 
@@ -138,7 +141,7 @@ class StaffAttendanceTest extends TestCase
         $this->actingAs($memberUser);
 
         // Clock in rejected
-        $this->post(route('staff.clock-in'))->assertForbidden();
+        $this->post(route('staff.clock-in'), ['photo' => UploadedFile::fake()->image('in.jpg', 640, 480)])->assertForbidden();
 
         // Admin recap rejected
         $this->get(route('staff.attendance.index'))->assertForbidden();

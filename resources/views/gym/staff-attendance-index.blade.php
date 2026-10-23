@@ -122,13 +122,16 @@
                         </td>
                         <td>
                             <small class="muted">{{ $att->notes ?: '—' }}</small>
+                            @include('gym.attendance-evidence', ['attendance' => $att])
                         </td>
                         <td>
+                            @if(!$att->clock_in_photo_path && !$att->clock_out_photo_path)
                             <form action="{{ route('staff.attendance.destroy', $att) }}" method="post" onsubmit="return confirm('Hapus data absensi ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="button compact ghost" style="color:#ef4444;padding:2px 8px;font-size:0.75rem;">Hapus</button>
                             </form>
+                            @else<small>Koreksi manual; bukti foto dipertahankan</small>@endif
                         </td>
                     </tr>
                 @empty

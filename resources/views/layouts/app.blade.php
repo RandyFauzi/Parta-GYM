@@ -9,13 +9,17 @@
 @elseif(auth()->user()->role==='personal_trainer')<a href="{{ route('coaching.members') }}"><x-icon name="users"/><span>Member binaan</span></a><a href="{{ route('classes') }}" class="{{ request()->routeIs('classes','classes.*')?'selected':'' }}"><x-icon name="layers"/><span>Jadwal kelas</span></a><a href="{{ route('staff.attendance.me') }}" class="{{ request()->routeIs('staff.attendance.me')?'selected':'' }}"><x-icon name="clock"/><span>Absensi Saya</span></a><a href="{{ route('account') }}" class="{{ request()->routeIs('account')?'selected':'' }}"><x-icon name="users"/><span>Profil saya</span></a>@else<a class="selected" aria-current="page" href="{{ route('portal') }}"><x-icon name="card"/>Membership saya</a><a href="#visits"><x-icon name="clock"/>Riwayat kunjungan</a><a href="#billing"><x-icon name="layers"/>Tagihan saya</a>@endif
 </nav>
 
+@if(auth()->user()->can('schedule.manage') || auth()->user()->role==='personal_trainer')<a class="button secondary compact" href="{{ route('trainer-availability') }}">Ketersediaan PT</a>@endif
+@if(auth()->user()->role==='owner')<a class="button secondary compact" href="{{ route('operating-hours') }}">Jam operasional</a>@endif
 <div class="sidebar-bottom"><div class="system-note"><span class="online-dot"></span> Connected to your gym<small>SPARTA Gym &amp; Pilates · Operations, simplified.</small></div><div class="user-row"><span class="avatar">{{ mb_substr(auth()->user()->name,0,1) }}</span><div>{{ auth()->user()->name }}<small>{{ ucfirst(auth()->user()->role) }}</small></div><form action="{{ route('logout') }}" method="post">@csrf<button class="icon-button" aria-label="Keluar"><x-icon name="logout"/></button></form></div></div></aside>
 <div class="main-shell"><header class="topbar"><div><a class="workspace-mobile-brand" href="{{ route('home') }}"><img class="parta-logo" src="{{ asset('images/Logos/sparta-logo-white.webp') }}" alt="SPARTA Gym &amp; Pilates" width="1301" height="325" decoding="async"></a><span class="breadcrumb">Workspace</span><span class="separator">/</span><strong>@yield('title','Ringkasan')</strong></div><div class="topbar-right">@if(in_array(auth()->user()->role,['owner','receptionist','personal_trainer'],true))
 @php
 $todayAtt = auth()->user()->todayAttendance;
 @endphp
 @if(!$todayAtt || !$todayAtt->clock_in_at)
-<form action="{{ route('staff.clock-in') }}" method="post" style="margin:0;">@csrf<button class="button compact" style="background:#10b981;border-color:#10b981;color:#fff;" title="Catat jam kehadiran masuk hari ini"><x-icon name="check"/> Clock In</button></form>
+<a class="button compact" href="{{ route('staff.attendance.me') }}">Foto Clock In</a>
+@elseif(!$todayAtt->clock_out_at)
+<a class="button compact secondary" href="{{ route('staff.attendance.me') }}">Foto Clock Out</a>
 @elseif(!$todayAtt->clock_out_at)
 <form action="{{ route('staff.clock-out') }}" method="post" style="margin:0;display:flex;align-items:center;gap:6px;">@csrf<span class="badge positive" style="font-size:0.75rem;">In: {{ $todayAtt->clock_in_at->timezone(config('gym.timezone'))->format('H:i') }}</span><button class="button compact secondary" title="Catat jam kepulangan hari ini">Clock Out</button></form>
 @else

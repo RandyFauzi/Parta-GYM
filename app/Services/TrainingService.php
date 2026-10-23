@@ -60,6 +60,7 @@ class TrainingService
             if ($start->lte(now()) || $end->lte($start) || $start->diffInHours($end) > 12) {
                 throw ValidationException::withMessages(['starts_at' => 'Jadwal harus dimulai di masa depan dan durasi maksimal 12 jam.']);
             }
+            app(TrainerAvailabilityService::class)->assertAvailable($profile, $start, $end, $session?->id);
             $overlaps = TrainingSession::where('status', 'scheduled')->where('starts_at', '<', $end)->where('ends_at', '>', $start)->when($session, fn ($q) => $q->whereKeyNot($session->id));
             if ((clone $overlaps)->where('trainer_profile_id', $profile->id)->exists()) {
                 throw ValidationException::withMessages(['trainer_profile_id' => 'Trainer sudah memiliki sesi pada waktu ini.']);

@@ -69,6 +69,16 @@ class Member extends Model
         return $this->hasMany(Checkin::class);
     }
 
+    public function creditEntries(): HasMany
+    {
+        return $this->hasMany(MemberCreditEntry::class);
+    }
+
+    public function getCreditBalanceIdrAttribute(): int
+    {
+        return (int) $this->creditEntries()->sum('amount_idr');
+    }
+
     public function trainingEnrollments(): HasMany
     {
         return $this->hasMany(ClassEnrollment::class);

@@ -11,11 +11,11 @@ class Checkin extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['member_id', 'membership_entitlement_id', 'membership_period_id', 'staff_id', 'method', 'checked_in_at'];
+    protected $fillable = ['member_id', 'checked_out_at', 'checkout_due_at', 'checkout_method', 'checked_out_by', 'membership_entitlement_id', 'membership_period_id', 'staff_id', 'method', 'checked_in_at'];
 
     protected function casts(): array
     {
-        return ['checked_in_at' => 'immutable_datetime'];
+        return ['checked_in_at' => 'immutable_datetime', 'checked_out_at' => 'immutable_datetime', 'checkout_due_at' => 'immutable_datetime'];
     }
 
     public function member(): BelongsTo

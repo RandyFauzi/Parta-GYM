@@ -12,7 +12,17 @@ class TrainerProfile extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['user_id', 'bio', 'specialization', 'qualifications', 'experience_years'];
+    protected $fillable = ['user_id', 'bio', 'specialization', 'qualifications', 'experience_years', 'availability', 'session_buffer_minutes'];
+
+    protected function casts(): array
+    {
+        return ['availability' => 'array', 'session_buffer_minutes' => 'integer'];
+    }
+
+    public function timeOffs(): HasMany
+    {
+        return $this->hasMany(TrainerTimeOff::class)->orderBy('starts_at');
+    }
 
     public function user(): BelongsTo
     {

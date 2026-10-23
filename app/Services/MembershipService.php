@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Checkin;
 use App\Models\Invoice;
 use App\Models\Member;
+use App\Models\MembershipChange;
 use App\Models\MembershipPeriod;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
@@ -62,6 +63,20 @@ class MembershipService
             if ($invoice->status === 'paid') {
                 return;
             }
+            if ($invoice->status !== 'unpaid') {
+                throw ValidationException::withMessages(['payment' => 'Invoice ini tidak dapat dibayar.']);
+            }
+            $change = MembershipChange::where('invoice_id', $invoice->id)->lockForUpdate()->first();
+            if ($change && $change->status !== 'pending') {
+                throw ValidationException::withMessages(['payment' => 'Permintaan perubahan paket sudah ditutup.']);
+            }
+            if ($change && $invoice->total_idr === 0) {
+                $method = 'credit';
+                $reference = 'Penyesuaian nilai sisa paket';
+            }
+            if (! in_array($method, ['cash', 'bank_transfer', 'qris', 'card', 'other'], true) && ! ($change && $invoice->total_idr === 0 && $method === 'credit')) {
+                throw ValidationException::withMessages(['payment' => 'Metode pembayaran tidak sesuai tagihan.']);
+            }
             $shift = null;
             if ($method === 'cash') {
                 $shift = StaffShift::where('active_staff_id', $staff->id)->lockForUpdate()->first();
@@ -87,10 +102,17 @@ class MembershipService
             if ($latest && CarbonImmutable::parse($latest, 'UTC')->greaterThan($start)) {
                 $start = CarbonImmutable::parse($latest, 'UTC')->setTimezone(config('gym.timezone'));
             }
+            if ($change) {
+                $start = CarbonImmutable::now(config('gym.timezone'));
+            }
             $end = $this->periodEnd($start, $invoice->snapshot['duration_unit'], $invoice->snapshot['duration_value']);
             $period = MembershipPeriod::create(['member_id' => $invoice->member_id, 'subscription_id' => $invoice->subscription_id, 'source_invoice_id' => $invoice->id, 'starts_at' => $start->utc(), 'ends_at' => $end->utc(), 'visit_limit' => $invoice->snapshot['visit_limit'], 'plan_type' => $planType, 'status' => 'active']);
             app(PackageBenefits::class)->initialize($period, $benefits);
             $invoice->update(['status' => 'paid']);
+            if ($change) {
+                $change->update(['status' => 'completed', 'activated_at' => $start]);
+                $this->audit('membership.change_completed', $change->id, ['new_period_id' => $period->id, 'source_period_id' => $change->source_period_id]);
+            }
             DB::table('subscriptions')->where('id', $invoice->subscription_id)->update(['status' => 'active', 'updated_at' => now()]);
             $this->audit('payment.confirmed', $invoice->id, ['method' => $method, 'amount_idr' => $invoice->total_idr]);
         }, 3);
@@ -102,6 +124,7 @@ class MembershipService
 
         return DB::transaction(function () use ($member, $staff) {
             $member = Member::whereKey($member->id)->lockForUpdate()->firstOrFail();
+            $deadline = app(OperatingHoursService::class)->checkoutDeadline(CarbonImmutable::now());
             $periods = $member->periods()->where('status', 'active')->where('starts_at', '<=', now())->where('ends_at', '>', now())->orderBy('ends_at')->orderBy('id')->lockForUpdate()->get();
             $entitlement = null;
             $hasAccess = false;
@@ -121,13 +144,13 @@ class MembershipService
             $reason = match (true) {
                 $member->status !== 'active' => 'MEMBERSHIP_SUSPENDED',
                 ! $hasAccess => 'MEMBERSHIP_EXPIRED',
-                Checkin::where('member_id', $member->id)->where('checked_in_at', '>', now()->subMinutes(config('gym.duplicate_minutes')))->exists() => 'DUPLICATE_CHECKIN',
+                Checkin::where('member_id', $member->id)->where(fn ($q) => $q->where('checked_in_at', '>', now()->subMinutes(config('gym.duplicate_minutes')))->orWhere(fn ($open) => $open->whereNotNull('checkout_due_at')->where('checkout_due_at', '>', now())->whereNull('checked_out_at')))->exists() => 'DUPLICATE_CHECKIN',
                 ! $entitlement => 'VISIT_LIMIT_REACHED',
                 default => null,
             };
             DB::table('checkin_attempts')->insert(['member_id' => $member->id, 'staff_id' => $staff->id, 'result' => $reason ?? 'SUCCESS', 'attempted_at' => now()]);
             if (! $reason) {
-                $checkin = Checkin::create(['member_id' => $member->id, 'membership_period_id' => $entitlement->membership_period_id, 'membership_entitlement_id' => $entitlement->id, 'staff_id' => $staff->id, 'checked_in_at' => now(), 'method' => 'manual']);
+                $checkin = Checkin::create(['member_id' => $member->id, 'membership_period_id' => $entitlement->membership_period_id, 'membership_entitlement_id' => $entitlement->id, 'staff_id' => $staff->id, 'checked_in_at' => now(), 'checkout_due_at' => $deadline, 'method' => 'manual']);
                 $this->audit('checkin.created', $checkin->id);
             }
 
