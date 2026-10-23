@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,12 +29,17 @@ class MemberProgressRecord extends Model
         'diet_summary',
         'coach_notes',
         'next_goals',
+        'activity',
+        'program_name',
+        'exercises',
+        'request_key',
     ];
 
     protected function casts(): array
     {
         return [
             'recorded_at' => 'immutable_datetime',
+            'exercises' => 'array',
             'weight_kg' => 'float',
             'height_cm' => 'float',
             'body_fat_percentage' => 'float',
@@ -48,6 +54,29 @@ class MemberProgressRecord extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    public function scopeVisibleToTrainer(Builder $query, User $trainer, Member $member): Builder
+    {
+        $activities = $member->trainerAssignments()->active()->whereHas('trainer', fn ($profile) => $profile->where('user_id', $trainer->id))->pluck('activity');
+
+        return $query->where(function (Builder $records) use ($activities): void {
+            $records->whereIn('activity', $activities);
+            if ($activities->isNotEmpty()) {
+                $records->orWhere(fn (Builder $legacy) => $legacy->whereNull('activity')->where(fn (Builder $session) => $session->whereNull('training_session_id')->orWhereHas('session', fn ($session) => $session->whereIn('activity', $activities))));
+            }
+        });
+    }
+
+    public function canBeReadBy(User $user): bool
+    {
+        if (! $user->is_active || $user->trashed()) {
+            return false;
+        }
+
+        return $user->role === 'owner'
+            || ($user->role === 'member' && $this->member->user_id === $user->id)
+            || ($user->role === 'personal_trainer' && self::whereKey($this->id)->visibleToTrainer($user, $this->member)->exists());
     }
 
     public function trainer(): BelongsTo

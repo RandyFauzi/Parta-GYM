@@ -9,22 +9,24 @@
     </div>
 </div>
 
-@php
-    $latest = $records->first();
-@endphp
+<form method="get" action="{{ route('portal.progress') }}" class="form-grid">
+    <div class="field"><label for="progress_activity">Aktivitas</label><select id="progress_activity" name="activity"><option value="">Semua, termasuk catatan lama</option>@foreach(['gym' => 'Gym', 'pilates' => 'Pilates'] as $value => $label)<option value="{{ $value }}" @selected(request('activity') === $value)>{{ $label }}</option>@endforeach</select></div>
+    <div><button class="button secondary">Tampilkan</button></div>
+</form>
+@include('gym.progress-measurements')
 
 @if($latest)
     <section class="m-summary-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
         <div class="m-stat-card" style="padding:16px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
             <small class="muted" style="display:block;margin-bottom:4px;">BERAT BADAN TERBARU</small>
-            <strong style="font-size:1.6rem;color:#f3f4f6;">{{ $latest->weight_kg ? $latest->weight_kg.' kg' : '—' }}</strong>
-            <small class="muted" style="display:block;margin-top:4px;">Diukur {{ $latest->recorded_at->timezone(config('gym.timezone'))->format('d M Y') }}</small>
+            <strong style="font-size:1.6rem;color:#f3f4f6;">{{ isset($measurements['weight_kg']) ? $measurements['weight_kg']['latest'].' kg' : '—' }}</strong>
+            <small class="muted" style="display:block;margin-top:4px;">@isset($measurements['weight_kg']) Diukur {{ $measurements['weight_kg']['to']->timezone(config('gym.timezone'))->format('d M Y') }} @else Belum ada pengukuran @endisset</small>
         </div>
 
         <div class="m-stat-card" style="padding:16px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
             <small class="muted" style="display:block;margin-bottom:4px;">BODY FAT</small>
-            <strong style="font-size:1.6rem;color:#f3f4f6;">{{ $latest->body_fat_percentage ? $latest->body_fat_percentage.'%' : '—' }}</strong>
-            <small class="muted" style="display:block;margin-top:4px;">Massa otot: {{ $latest->muscle_mass_kg ? $latest->muscle_mass_kg.' kg' : '—' }}</small>
+            <strong style="font-size:1.6rem;color:#f3f4f6;">{{ isset($measurements['body_fat_percentage']) ? $measurements['body_fat_percentage']['latest'].'%' : '—' }}</strong>
+            <small class="muted" style="display:block;margin-top:4px;">Massa otot: {{ isset($measurements['muscle_mass_kg']) ? $measurements['muscle_mass_kg']['latest'].' kg' : '—' }}</small>
         </div>
 
         <div class="m-stat-card" style="padding:16px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
@@ -34,8 +36,8 @@
         </div>
 
         <div class="m-stat-card" style="padding:16px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);">
-            <small class="muted" style="display:block;margin-bottom:4px;">TOTAL SESI TERCATAT</small>
-            <strong style="font-size:1.6rem;color:#f59e0b;">{{ $records->total() }} Sesi</strong>
+            <small class="muted" style="display:block;margin-bottom:4px;">TOTAL LAPORAN TERCATAT</small>
+            <strong style="font-size:1.6rem;color:#f59e0b;">{{ $records->total() }} Laporan</strong>
             <small class="muted" style="display:block;margin-top:4px;">Evaluasi oleh trainer</small>
         </div>
     </section>
@@ -77,6 +79,9 @@
                 </div>
             </div>
 
+            <p><strong>{{ $r->program_name ?? 'Evaluasi latihan' }}</strong> · {{ $r->activity ? ucfirst($r->activity) : 'Catatan lama' }}</p>
+            <a class="button secondary" href="{{ route('members.progress.show', [$member, $r]) }}">Lihat laporan lengkap</a>
+            @include('gym.progress-exercises', ['record' => $r])
             {{-- Ringkasan Pengukuran Fisik jika ada --}}
             @if($r->chest_cm || $r->waist_cm || $r->hips_cm || $r->arms_cm)
                 <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:0.85rem;margin-bottom:14px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;">

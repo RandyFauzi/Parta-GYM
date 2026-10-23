@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\StaffShift;
 use App\Models\TrainerProfile;
 use App\Models\User;
+use App\Services\MemberProgressService;
 use App\Services\MembershipService;
 use App\Services\WhatsAppService;
 use Carbon\CarbonImmutable;
@@ -168,8 +169,10 @@ class GymController extends Controller
     public function member(Member $member): View
     {
         return view('gym.member', [
-            'member' => $member->load('currentPeriod.invoice', 'periods.invoice', 'progressRecords.trainer', 'progressRecords.session'),
+            'member' => $member->load('currentPeriod.invoice', 'periods.invoice'),
             'trainers' => TrainerProfile::with('user')->whereHas('user', fn ($q) => $q->where('role', 'personal_trainer')->where('is_active', true))->get(),
+            'records' => auth()->user()->role === 'owner' ? $member->progressRecords()->with('trainer', 'session')->orderByDesc('created_at')->orderByDesc('id')->paginate(10, ['*'], 'progress_page') : null,
+            'measurements' => auth()->user()->role === 'owner' ? app(MemberProgressService::class)->measurements($member->progressRecords()) : [],
             'assignments' => $member->trainerAssignments()->with('trainer.user')->latest()->get(),
             'plans' => MembershipPlan::where('is_active', true)->get(),
             'invoices' => $member->invoices()->latest()->get(),

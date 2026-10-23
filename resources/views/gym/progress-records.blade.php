@@ -15,6 +15,8 @@
             <summary class="text-link"><strong>+ Tambah Catatan Progres / Evaluasi Latihan</strong></summary>
             <form action="{{ route('members.progress.store', $member) }}" method="post" style="margin-top:16px;">
                 @csrf
+                <input type="hidden" name="request_key" value="{{ old('request_key', (string) \Illuminate\Support\Str::uuid()) }}">
+                @include('gym.progress-program')
                 <div class="form-grid">
                     <div class="field">
                         <label for="progress_recorded_at">Tanggal &amp; Waktu Sesi *</label>
@@ -68,8 +70,9 @@
         </details>
     @endif
 
+    @include('gym.progress-measurements')
     <div class="progress-timeline">
-        @forelse($member->progressRecords as $pr)
+        @forelse(($records ?? $member->progressRecords) as $pr)
             <div style="padding:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                     <div>
@@ -91,6 +94,8 @@
                     </div>
                 </div>
 
+                <p><strong>{{ $pr->program_name ?? 'Evaluasi latihan' }}</strong> · {{ $pr->activity ? ucfirst($pr->activity) : 'Catatan lama' }}</p>
+                <a class="text-link" href="{{ route('members.progress.show', [$member, $pr]) }}">Lihat laporan lengkap</a>
                 <p style="margin:4px 0 8px;line-height:1.5;white-space:pre-line;">{{ $pr->workout_summary }}</p>
 
                 @if($pr->coach_notes)
@@ -108,4 +113,5 @@
             <div class="empty">Belum ada catatan progres atau hasil latihan yang dicatat untuk anggota ini.</div>
         @endforelse
     </div>
+    @isset($records) {{ $records->links() }} @endisset
 </section>

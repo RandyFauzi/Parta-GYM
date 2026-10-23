@@ -229,3 +229,27 @@ document.querySelectorAll('[data-attendance-camera]').forEach(widget => {
   }, 'image/jpeg', 0.88);
  });
 });
+
+document.querySelectorAll('[data-progress-exercises]').forEach(widget => {
+ const rows = widget.querySelector('[data-exercise-rows]');
+ const add = widget.querySelector('[data-exercise-add]');
+ const status = widget.querySelector('[data-exercise-status]');
+ const sync = () => { add.disabled = rows.children.length >= 20; };
+ add.addEventListener('click', () => {
+  const index = rows.children.length;
+  if (index >= 20) return;
+  const row = rows.firstElementChild.cloneNode(true);
+  row.querySelector('legend').textContent = `Gerakan ${index + 1}`;
+  row.querySelectorAll('[role="alert"]').forEach(error => error.remove());
+  row.querySelectorAll('input').forEach(input => {
+   const key = input.name.match(/\[([^\]]+)\]$/)[1];
+   const id = `exercise_${index}_${key}`;
+   input.closest('.field').querySelector('label').htmlFor = id;
+   input.id = id; input.name = `exercises[${index}][${key}]`; input.value = '';
+  });
+  rows.append(row); row.querySelector('input').focus();
+  status.textContent = `${index + 1} baris gerakan tersedia, maksimal 20.`;
+  sync();
+ });
+ sync();
+});

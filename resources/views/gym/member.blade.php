@@ -134,7 +134,9 @@
 </div>
 
 @if(auth()->user()->role==='owner')
+@if(auth()->user()->role === 'owner')
 @include('gym.progress-records')
+@endif
 @endif
 
 <details class="panel form-panel spaced">

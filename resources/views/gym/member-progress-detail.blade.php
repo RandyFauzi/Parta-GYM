@@ -32,6 +32,9 @@
         </div>
     </div>
 
+    <h2>{{ $record->program_name ?? 'Evaluasi latihan' }}</h2>
+    <p>{{ $record->activity ? ucfirst($record->activity) : 'Catatan lama — aktivitas belum diklasifikasikan' }}</p>
+    @include('gym.progress-exercises')
     <div style="margin-bottom:24px;">
         <h3>Pengukuran Fisik &amp; Komposisi Tubuh</h3>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px;">

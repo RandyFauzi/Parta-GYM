@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
+use App\Services\MemberProgressService;
 use App\Services\MemberQrCode;
 use App\Services\MembershipService;
 use Carbon\CarbonImmutable;
@@ -113,14 +114,18 @@ class MemberPortalController extends Controller
         return view('member.receipt', compact('member', 'invoice') + ['payment' => Payment::where('invoice_id', $invoice->id)->first()]);
     }
 
-    public function progress(Request $request): View
+    public function progress(Request $request, MemberProgressService $progressService): View
     {
         $member = $this->member($request);
-        $records = $member->progressRecords()->with('trainer', 'session')->paginate(10);
+        $request->validate(['activity' => 'nullable|in:gym,pilates']);
+        $query = $member->progressRecords()->when($request->filled('activity'), fn ($query) => $query->where('activity', $request->input('activity')));
+        $records = (clone $query)->with('trainer', 'session')->orderByDesc('created_at')->orderByDesc('id')->paginate(10)->withQueryString();
 
         return view('member.progress', [
             'member' => $member,
             'records' => $records,
+            'latest' => (clone $query)->orderByDesc('created_at')->orderByDesc('id')->first(),
+            'measurements' => $progressService->measurements($query),
         ]);
     }
 
