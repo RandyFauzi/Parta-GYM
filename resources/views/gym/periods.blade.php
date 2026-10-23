@@ -1,5 +1,3 @@
 <section class="panel spaced"><div class="panel-heading"><div><h2>Masa keanggotaan</h2><p>Periode aktif, terjadwal, dan riwayat pembelian</p></div></div><div class="table-wrap"><table><thead><tr><th>Paket</th><th>Mulai</th><th>Berakhir</th><th>Status periode</th></tr></thead><tbody>@forelse($member->periods->sortByDesc('starts_at') as $period)<tr><td>{{ $period->invoice->snapshot['name'] }}
-@if(in_array($period->plan_type,['pt','all_access'],true))
-<small>PT: {{ $period->used_sessions }} terpakai · {{ $period->reserved_sessions }} dipesan · {{ $period->visit_limit===null?'Tanpa batas':max(0,$period->visit_limit-$period->used_sessions-$period->reserved_sessions).' tersisa' }}</small>
-@endif
+@include('gym.entitlement-summary', ['entitlements' => $period->entitlements])
 </td><td>{{ $period->starts_at->timezone(config('gym.timezone'))->format('d M Y H:i') }}</td><td>{{ $period->ends_at->timezone(config('gym.timezone'))->format('d M Y H:i') }}</td><td>{{ $period->starts_at->isFuture()?'Terjadwal':($period->ends_at->isPast()?'Berakhir':'Aktif') }}</td></tr>@empty<tr><td colspan="4" class="empty">Belum ada periode keanggotaan berbayar.</td></tr>@endforelse</tbody></table></div></section>

@@ -8,6 +8,19 @@ use Carbon\CarbonImmutable;
 
 class WhatsAppService
 {
+    public function getBookingUrl(Member $member, ?string $activity = null): ?string
+    {
+        $phone = $this->formatPhone((string) config('gym.booking_whatsapp'));
+        if (! preg_match('/^[1-9][0-9]{7,14}$/D', $phone)) {
+            return null;
+        }
+        $activityLabel = $activity === 'gym' ? 'Gym / PT' : ($activity === 'pilates' ? 'Pilates' : 'Gym / Pilates');
+        $message = "Halo admin, saya {$member->full_name} ({$member->member_number}). Saya ingin booking {$activityLabel}.\n".
+            "Tanggal dan jam yang diinginkan: ...\nMohon pengecekan paket, ketersediaan jadwal, dan penugasan PT oleh management.";
+
+        return $this->buildUrl($phone, $message);
+    }
+
     /**
      * Format any valid Indonesian phone number into WhatsApp international digit format (e.g. 628123456789).
      */

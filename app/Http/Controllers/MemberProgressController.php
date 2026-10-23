@@ -19,7 +19,7 @@ class MemberProgressController extends Controller
 
     public function index(Request $request): View
     {
-        return view('gym.coaching-members', ['members' => Member::whereHas('trainingEnrollments', fn ($query) => $query->whereIn('status', ['confirmed', 'attended', 'no_show'])->whereHas('session.trainer', fn ($trainer) => $trainer->where('user_id', $request->user()->id)))->orderBy('full_name')->paginate(20)]);
+        return view('gym.coaching-members', ['members' => Member::whereHas('trainerAssignments', fn ($query) => $query->active()->whereHas('trainer', fn ($trainer) => $trainer->where('user_id', $request->user()->id)))->orderBy('full_name')->paginate(20)]);
     }
 
     public function member(Request $request, Member $member): View
@@ -33,7 +33,8 @@ class MemberProgressController extends Controller
     {
         $data = $request->validated();
         if (! empty($data['training_session_id']) && $request->user()->role === 'personal_trainer') {
-            abort_unless(TrainingSession::whereKey($data['training_session_id'])->whereHas('trainer', fn ($query) => $query->where('user_id', $request->user()->id))->exists(), 403);
+            $session = TrainingSession::whereKey($data['training_session_id'])->whereHas('trainer', fn ($query) => $query->where('user_id', $request->user()->id))->first();
+            abort_unless($session && $member->isCoachedBy($request->user(), $session->activity), 403);
         }
         $data['recorded_at'] = CarbonImmutable::parse($data['recorded_at'], config('gym.timezone'))->utc();
         $data['member_id'] = $member->id;
@@ -54,7 +55,7 @@ class MemberProgressController extends Controller
     public function destroy(Request $request, MemberProgressRecord $record): RedirectResponse
     {
         abort_unless(
-            $request->user()->role === 'owner' || ($request->user()->role === 'personal_trainer' && $record->trainer_id === $request->user()->id),
+            $request->user()->role === 'owner' || ($request->user()->role === 'personal_trainer' && $record->trainer_id === $request->user()->id && $record->member->isCoachedBy($request->user())),
             403
         );
 

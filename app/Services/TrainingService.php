@@ -26,7 +26,7 @@ class TrainingService
             $profile = $profiles->firstWhere('id', $data['trainer_profile_id']);
             $trainer = $trainerUsers->firstWhere('id', $profile?->user_id);
             $room = $rooms->firstWhere('id', $data['studio_room_id']);
-            abort_unless($actor->role === 'owner' || ($actor->role === 'personal_trainer' && $profile?->user_id === $actor->id && (! $session || $session->trainer_profile_id === $profile->id)), 403);
+            abort_unless($actor->hasPermission('schedule.manage'), 403);
             if (! $trainer || ! $trainer->is_active || $trainer->role !== 'personal_trainer') {
                 throw ValidationException::withMessages(['trainer_profile_id' => 'Pilih trainer yang aktif.']);
             }
@@ -46,6 +46,9 @@ class TrainingService
                 $filled = $current->enrollments()->whereIn('status', ['confirmed', 'attended', 'no_show'])->count();
                 if ($data['capacity'] < $filled) {
                     throw ValidationException::withMessages(['capacity' => 'Kapasitas tidak boleh lebih kecil dari jumlah peserta.']);
+                }
+                if ($filled > 0 && $current->kind === 'personal' && $current->trainer_profile_id !== $profile->id) {
+                    throw ValidationException::withMessages(['trainer_profile_id' => 'Sesi personal sudah memiliki peserta. Batalkan booking sebelum mengganti PT.']);
                 }
                 if ($filled > 0 && ($current->kind !== $data['kind'] || $current->activity !== $data['activity'])) {
                     throw ValidationException::withMessages(['kind' => 'Jenis kelas dengan peserta tidak dapat diganti. Batalkan dan buat jadwal pengganti.']);
@@ -83,7 +86,7 @@ class TrainingService
     public function enroll(TrainingSession $session, Member $member, User $actor): void
     {
         DB::transaction(function () use ($session, $member, $actor) {
-            abort_unless(in_array($actor->role, ['owner', 'receptionist'], true) || ($actor->role === 'member' && $member->user_id === $actor->id), 403);
+            abort_unless($actor->hasPermission('booking.manage'), 403);
             $member = Member::whereKey($member->id)->lockForUpdate()->firstOrFail();
             $session = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
             if ($member->status !== 'active' || $session->status !== 'scheduled' || $session->starts_at->lte(now())) {
@@ -100,30 +103,53 @@ class TrainingService
             if ($conflict) {
                 throw ValidationException::withMessages(['member_id' => 'Anggota sudah terdaftar pada sesi lain di waktu ini.']);
             }
-            $period = null;
+            $entitlement = null;
             if ($session->kind === 'personal') {
-                $periods = $member->periods()->whereIn('plan_type', ['pt', 'all_access'])->where('status', 'active')->where('starts_at', '<=', $session->starts_at)->where('ends_at', '>', $session->starts_at)->orderBy('ends_at')->lockForUpdate()->get();
-                foreach ($periods as $candidate) {
-                    $reserved = ClassEnrollment::where('membership_period_id', $candidate->id)->whereIn('status', ['confirmed', 'attended', 'no_show'])->count();
-                    if ($candidate->visit_limit === null || $reserved < $candidate->visit_limit) {
-                        $period = $candidate;
-                        break;
-                    }
-                }
-                if (! $period) {
-                    throw ValidationException::withMessages(['member_id' => 'Paket PT tidak aktif pada jadwal ini atau sisa sesi sudah habis.']);
+                $assigned = $member->trainerAssignments()->active()->where('activity', $session->activity)
+                    ->where('trainer_profile_id', $session->trainer_profile_id)
+                    ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>=', $session->ends_at))->exists();
+                if (! $assigned) {
+                    throw ValidationException::withMessages(['member_id' => 'Management harus menetapkan PT member sesuai aktivitas dan masa jadwal terlebih dahulu.']);
                 }
             }
-            $enrollment = ClassEnrollment::updateOrCreate(['training_session_id' => $session->id, 'member_id' => $member->id], ['created_by' => $actor->id, 'membership_period_id' => $period?->id, 'status' => 'confirmed', 'attended_at' => null, 'recorded_by' => null]);
-            app(MembershipService::class)->audit('class.enrolled', $enrollment->id);
+            if (! $session->trainer->user->is_active || $session->trainer->user->trashed() || $session->trainer->user->role !== 'personal_trainer') {
+                throw ValidationException::withMessages(['member_id' => 'PT sesi ini tidak aktif. Hubungi management.']);
+            }
+            $key = $session->activity.'_'.$session->kind;
+            $periods = $member->periods()->where('status', 'active')->where('starts_at', '<=', $session->starts_at)->where('ends_at', '>=', $session->ends_at)->orderBy('ends_at')->orderBy('id')->lockForUpdate()->get();
+            foreach ($periods as $period) {
+                if (! $period->entitlements()->exists()) {
+                    app(PackageBenefits::class)->initialize($period, $period->invoice->snapshot['benefits'] ?? PackageBenefits::legacy($period->plan_type, $period->visit_limit));
+                }
+                $keys = $session->kind === 'personal' ? [$key, 'legacy_personal'] : [$key];
+                foreach ($period->entitlements()->whereIn('benefit_key', $keys)->orderBy('benefit_key')->lockForUpdate()->get() as $candidate) {
+                    if ($candidate->remaining === null || $candidate->remaining > 0) {
+                        $entitlement = $candidate;
+                        break 2;
+                    }
+                }
+            }
+            if (! $entitlement) {
+                throw ValidationException::withMessages(['member_id' => 'Manfaat paket tidak sesuai aktivitas, tidak berlaku pada jadwal ini, atau kuota sudah habis.']);
+            }
+            $enrollment = ClassEnrollment::updateOrCreate(
+                ['training_session_id' => $session->id, 'member_id' => $member->id],
+                ['created_by' => $actor->id, 'membership_period_id' => $entitlement->membership_period_id, 'membership_entitlement_id' => $entitlement->id, 'booking_source' => 'whatsapp', 'status' => 'confirmed', 'attended_at' => null, 'recorded_by' => null]
+            );
+            app(MembershipService::class)->audit('class.enrolled', $enrollment->id, ['source' => 'whatsapp', 'entitlement_id' => $entitlement->id]);
         }, 3);
     }
 
     public function attendance(ClassEnrollment $enrollment, string $status, User $actor): void
     {
+        abort_unless(in_array($status, ['attended', 'no_show', 'cancelled'], true), 422);
         DB::transaction(function () use ($enrollment, $status, $actor) {
+            Member::whereKey($enrollment->member_id)->lockForUpdate()->firstOrFail();
             $session = TrainingSession::whereKey($enrollment->training_session_id)->lockForUpdate()->firstOrFail();
             $enrollment = ClassEnrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            $trainerAllowed = $actor->is_active && $actor->role === 'personal_trainer' && $session->trainer->user_id === $actor->id
+                && ($session->kind !== 'personal' || $enrollment->member->isCoachedBy($actor, $session->activity));
+            abort_unless($actor->hasPermission('booking.manage') || ($trainerAllowed && $status !== 'cancelled'), 403);
             if ($enrollment->status === $status) {
                 return;
             }
@@ -140,9 +166,10 @@ class TrainingService
 
     public function close(TrainingSession $session, string $status, ?string $reason, User $actor): void
     {
+        abort_unless(in_array($status, ['completed', 'cancelled'], true), 422);
         DB::transaction(function () use ($session, $status, $reason, $actor) {
             $session = TrainingSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
-            abort_unless($actor->role === 'owner' || ($actor->role === 'personal_trainer' && $session->trainer->user_id === $actor->id), 403);
+            abort_unless($actor->hasPermission('schedule.manage') || ($actor->is_active && $actor->role === 'personal_trainer' && $session->trainer->user_id === $actor->id && $status === 'completed'), 403);
             if ($session->status !== 'scheduled') {
                 return;
             }

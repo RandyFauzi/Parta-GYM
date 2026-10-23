@@ -19,6 +19,18 @@ class MembershipPeriod extends Model
         return ['visit_limit' => 'integer', 'starts_at' => 'immutable_datetime', 'ends_at' => 'immutable_datetime'];
     }
 
+    public function entitlements(): HasMany
+    {
+        return $this->hasMany(MembershipEntitlement::class);
+    }
+
+    public function getGymQuotaAttribute(): ?int
+    {
+        $entitlement = $this->entitlements->firstWhere('benefit_key', 'gym_access');
+
+        return $entitlement ? $entitlement->quota : $this->visit_limit;
+    }
+
     public function classEnrollments(): HasMany
     {
         return $this->hasMany(ClassEnrollment::class);

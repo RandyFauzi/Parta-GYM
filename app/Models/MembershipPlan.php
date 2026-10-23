@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PackageBenefits;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,16 +28,24 @@ class MembershipPlan extends Model
         'visit_limit',
         'price_idr',
         'is_active',
+        'benefits',
     ];
 
     protected function casts(): array
     {
         return [
+            'benefits' => 'array',
             'is_active' => 'boolean',
             'price_idr' => 'integer',
             'duration_value' => 'integer',
             'visit_limit' => 'integer',
         ];
+    }
+
+    /** @return array<string, int|null> */
+    public function getBenefitDefinitionsAttribute(): array
+    {
+        return array_map(fn (int|string|null $quota): ?int => $quota === null ? null : (int) $quota, $this->benefits ?? PackageBenefits::legacy($this->plan_type, $this->visit_limit));
     }
 
     public function isPersonalTraining(): bool

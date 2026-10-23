@@ -11,9 +11,24 @@ class PlanRequest extends FormRequest
         return $this->user()->role === 'owner';
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->boolean('benefits_editor')) {
+            $benefits = [];
+            foreach ((array) $this->input('benefit_keys', []) as $key) {
+                if (is_string($key)) {
+                    $benefits[$key] = $this->input('benefit_quotas.'.$key);
+                }
+            }
+            $this->merge(['benefits' => $benefits]);
+        }
+    }
+
     public function rules(): array
     {
         return [
+            'benefits' => 'sometimes|required|array:gym_access,gym_group,gym_personal,pilates_group,pilates_personal,legacy_personal|min:1',
+            'benefits.*' => 'nullable|integer|min:1|max:10000',
             'name' => 'required|string|max:100',
             'plan_type' => 'required|in:gym,pt,pilates,all_access',
             'description' => 'nullable|string|max:1000',

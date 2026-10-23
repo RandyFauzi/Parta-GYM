@@ -14,6 +14,9 @@ class UserAccountRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->boolean('permissions_present') && ! $this->has('permissions')) {
+            $this->merge(['permissions' => []]);
+        }
         $this->merge(['email' => strtolower(trim((string) $this->email))]);
     }
 
@@ -26,6 +29,8 @@ class UserAccountRequest extends FormRequest
             'is_active' => 'required|boolean',
             'password' => [$this->isMethod('post') ? 'required' : 'nullable', 'string', 'min:12', 'max:200', 'confirmed'],
             'member_id' => ['exclude_unless:role,member', 'required', 'uuid', Rule::exists('members', 'id')],
+            'permissions' => 'sometimes|array',
+            'permissions.*' => ['string', 'distinct', Rule::in(array_keys(config('gym.staff_permissions')))],
             'bio' => 'nullable|string|max:2000',
             'specialization' => 'nullable|string|max:200',
             'qualifications' => 'nullable|string|max:1000',

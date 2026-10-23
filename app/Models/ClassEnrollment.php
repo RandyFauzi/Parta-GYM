@@ -11,7 +11,7 @@ class ClassEnrollment extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['training_session_id', 'member_id', 'status', 'created_by', 'attended_at', 'recorded_by', 'membership_period_id'];
+    protected $fillable = ['training_session_id', 'member_id', 'status', 'created_by', 'attended_at', 'recorded_by', 'booking_source', 'membership_entitlement_id', 'membership_period_id'];
 
     protected function casts(): array
     {

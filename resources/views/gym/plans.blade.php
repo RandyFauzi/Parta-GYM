@@ -539,7 +539,7 @@ dialog.pricing-sheet-dialog::backdrop {
                 <ul class="pricing-features-wrap">
                     <li class="pricing-feature-row">
                         <span class="pricing-check-bullet"><x-icon name="check"/></span>
-                        <span>{{ $plan->visit_limit ? 'Kuota '.$plan->visit_limit.' Sesi Latihan' : 'Akses Tanpa Batas Sesi' }}</span>
+                        <span>@foreach($plan->benefit_definitions as $benefitKey => $quota)<span>{{ \App\Services\PackageBenefits::LABELS[$benefitKey] }}: {{ $quota === null ? 'Tanpa batas' : $quota }}</span>@if(!$loop->last)<br>@endif @endforeach</span>
                     </li>
                     <li class="pricing-feature-row">
                         <span class="pricing-check-bullet"><x-icon name="check"/></span>

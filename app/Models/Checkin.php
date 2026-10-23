@@ -11,7 +11,7 @@ class Checkin extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['member_id', 'membership_period_id', 'staff_id', 'method', 'checked_in_at'];
+    protected $fillable = ['member_id', 'membership_entitlement_id', 'membership_period_id', 'staff_id', 'method', 'checked_in_at'];
 
     protected function casts(): array
     {

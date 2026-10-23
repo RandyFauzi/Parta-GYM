@@ -6,6 +6,7 @@ use App\Http\Controllers\MemberPortalController;
 use App\Http\Controllers\MemberProgressController;
 use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\TrainerAssignmentController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -61,12 +62,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/staff-attendance', [StaffAttendanceController::class, 'manualStore'])->name('staff.attendance.manual');
         Route::delete('/staff-attendance/{attendance}', [StaffAttendanceController::class, 'destroy'])->name('staff.attendance.destroy');
     });
-    Route::middleware('role:owner,personal_trainer')->prefix('admin')->group(function () {
+    Route::middleware(['role:owner,receptionist', 'can:schedule.manage'])->prefix('admin')->group(function () {
         Route::get('/classes/new', [TrainingController::class, 'create'])->name('classes.create');
         Route::post('/classes', [TrainingController::class, 'store'])->name('classes.store');
         Route::get('/classes/{session}/edit', [TrainingController::class, 'edit'])->name('classes.edit');
         Route::put('/classes/{session}', [TrainingController::class, 'update'])->name('classes.update');
-        Route::post('/classes/{session}/close', [TrainingController::class, 'close'])->name('classes.close');
+    });
+    Route::middleware(['role:owner,receptionist', 'can:assignments.manage'])->group(function () {
+        Route::post('/members/{member}/trainer-assignments', [TrainerAssignmentController::class, 'store'])->name('trainer-assignments.store');
+        Route::delete('/trainer-assignments/{assignment}', [TrainerAssignmentController::class, 'destroy'])->name('trainer-assignments.destroy');
+    });
+    Route::post('/admin/classes/{session}/close', [TrainingController::class, 'close'])->middleware('role:owner,receptionist,personal_trainer')->name('classes.close');
+    Route::middleware('role:owner,personal_trainer')->prefix('admin')->group(function () {
         Route::post('/members/{member}/progress', [MemberProgressController::class, 'store'])->name('members.progress.store');
         Route::delete('/progress/{record}', [MemberProgressController::class, 'destroy'])->name('members.progress.destroy');
     });
@@ -76,7 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', [UserController::class, 'account'])->name('account');
     Route::get('/classes', [TrainingController::class, 'index'])->middleware('role:owner,receptionist,personal_trainer,member')->name('classes');
     Route::get('/classes/{session}', [TrainingController::class, 'show'])->middleware('role:owner,receptionist,personal_trainer,member')->name('classes.show');
-    Route::post('/classes/{session}/participants', [TrainingController::class, 'enroll'])->middleware('role:owner,receptionist')->name('classes.enroll');
+    Route::post('/classes/{session}/participants', [TrainingController::class, 'enroll'])->middleware(['role:owner,receptionist', 'can:booking.manage'])->name('classes.enroll');
     Route::put('/class-participants/{enrollment}', [TrainingController::class, 'attendance'])->middleware('role:owner,receptionist,personal_trainer')->name('classes.attendance');
     Route::get('/invoices/{invoice}', [GymController::class, 'receipt'])->name('invoices.show');
     Route::get('/members/{member}/progress/{record}', [MemberProgressController::class, 'show'])->name('members.progress.show');

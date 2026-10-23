@@ -76,7 +76,7 @@ class MemberPortalController extends Controller
         $member = $this->member($request);
         $code = str_pad((string) $request->user()->id, 12, '0', STR_PAD_LEFT);
         $usedVisits = $member->currentPeriod ? $member->checkins()->where('membership_period_id', $member->currentPeriod->id)->count() : 0;
-        $eligible = $member->status === 'active' && $member->currentPeriod && ($member->currentPeriod->visit_limit === null || $usedVisits < $member->currentPeriod->visit_limit);
+        $eligible = $member->status === 'active' && $member->currentPeriod && ($member->currentPeriod->gym_quota === null || $usedVisits < $member->currentPeriod->gym_quota);
 
         return view('member.card', compact('member', 'code', 'usedVisits', 'eligible') + ['qrCode' => $qrCode->encode($code)]);
     }

@@ -9,14 +9,7 @@ class TrainingSessionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array($this->user()?->role, ['owner', 'personal_trainer'], true) && $this->user()->is_active;
-    }
-
-    protected function prepareForValidation(): void
-    {
-        if ($this->user()?->role === 'personal_trainer') {
-            $this->merge(['trainer_profile_id' => $this->user()->trainerProfile?->id]);
-        }
+        return $this->user()->hasPermission('schedule.manage');
     }
 
     public function rules(): array

@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\ClassEnrollment;
 use App\Models\Member;
+use App\Models\MembershipPlan;
 use App\Models\StudioRoom;
 use App\Models\TrainerProfile;
 use App\Models\TrainingSession;
 use App\Models\User;
+use App\Services\MembershipService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class TrainingManagementTest extends TestCase
@@ -51,15 +54,17 @@ class TrainingManagementTest extends TestCase
         $session = TrainingSession::factory()->create(['capacity' => 1]);
         $account = User::factory()->create(['role' => 'member']);
         $member = Member::factory()->create(['user_id' => $account->id, 'full_name' => 'Private Participant']);
-        $this->post('/classes/'.$session->id.'/participants', ['member_id' => $member->id])->assertSessionHasNoErrors();
-        $this->post('/classes/'.$session->id.'/participants', ['member_id' => $member->id])->assertSessionHasNoErrors();
-        $this->post('/classes/'.$session->id.'/participants', ['member_id' => Member::factory()->create()->id])->assertSessionHasErrors('member_id');
+        $invoice = app(MembershipService::class)->createInvoice($member, MembershipPlan::factory()->create(['plan_type' => 'pilates']), (string) Str::uuid());
+        app(MembershipService::class)->settle($invoice, auth()->user(), 'qris', null);
+        $this->post('/classes/'.$session->id.'/participants', ['member_id' => $member->id, 'wa_confirmed' => 1])->assertSessionHasNoErrors();
+        $this->post('/classes/'.$session->id.'/participants', ['member_id' => $member->id, 'wa_confirmed' => 1])->assertSessionHasNoErrors();
+        $this->post('/classes/'.$session->id.'/participants', ['member_id' => Member::factory()->create()->id, 'wa_confirmed' => 1])->assertSessionHasErrors('member_id');
         $this->assertDatabaseCount('class_enrollments', 1);
         $otherAccount = User::factory()->create(['role' => 'member']);
         Member::factory()->create(['user_id' => $otherAccount->id]);
         $this->actingAs($otherAccount)->get('/classes/'.$session->id)->assertOk()->assertDontSee('Private Participant');
         $this->actingAs($account)->get('/classes/'.$session->id)->assertOk()->assertSee('Private Participant');
-        $this->post('/classes/'.$session->id.'/participants', ['member_id' => $member->id])->assertForbidden();
+        $this->post('/classes/'.$session->id.'/participants', ['member_id' => $member->id, 'wa_confirmed' => 1])->assertForbidden();
     }
 
     public function test_trainer_only_sees_assigned_classes_and_records_attendance_once(): void
@@ -116,27 +121,25 @@ class TrainingManagementTest extends TestCase
         $this->get('/admin/classes/new?source='.$session->id)->assertOk()->assertSee('Pilates Flow');
     }
 
-    public function test_trainer_schedules_only_own_classes_and_member_self_enrolls(): void
+    public function test_management_schedules_classes_and_member_books_only_through_whatsapp(): void
     {
         $trainer = TrainerProfile::factory()->create();
         $other = TrainerProfile::factory()->create();
-        $data = $this->schedule($other, StudioRoom::factory()->create());
-        $this->actingAs($trainer->user)->get('/admin/classes/new')->assertOk();
-        $this->post('/admin/classes', $data)->assertSessionHasNoErrors();
+        $data = $this->schedule($trainer, StudioRoom::factory()->create());
+        $this->actingAs($trainer->user)->get('/admin/classes/new')->assertForbidden();
+        $this->post('/admin/classes', $data)->assertForbidden();
+        $this->actingAs(User::factory()->create(['role' => 'owner']))->post('/admin/classes', $data)->assertSessionHasNoErrors();
         $session = TrainingSession::firstOrFail();
         $this->assertSame($trainer->id, $session->trainer_profile_id);
         $foreign = TrainingSession::factory()->create(['trainer_profile_id' => $other->id]);
-        $this->get('/admin/classes/'.$foreign->id.'/edit')->assertForbidden();
+        $this->actingAs($trainer->user)->get('/admin/classes/'.$foreign->id.'/edit')->assertForbidden();
         $this->put('/admin/classes/'.$foreign->id, $data)->assertForbidden();
         $this->post('/admin/classes/'.$foreign->id.'/close', ['status' => 'cancelled', 'reason' => 'Wrong class', 'confirmed' => 1])->assertForbidden();
         $account = User::factory()->create(['role' => 'member']);
-        $member = Member::factory()->create(['user_id' => $account->id]);
-        $this->actingAs($account)->get('/classes/'.$session->id)->assertOk()->assertSee('Ikut kelas');
-        $this->post('/classes/'.$session->id.'/join', ['member_id' => Member::factory()->create()->id])->assertSessionHasNoErrors();
-        $this->post('/classes/'.$session->id.'/join')->assertSessionHasNoErrors();
-        $this->assertDatabaseCount('class_enrollments', 1);
-        $this->assertDatabaseHas('class_enrollments', ['member_id' => $member->id, 'training_session_id' => $session->id]);
-        $this->get('/classes?mine=1')->assertOk()->assertSee('Pilates Flow');
+        Member::factory()->create(['user_id' => $account->id]);
+        $this->actingAs($account)->get('/classes/'.$session->id)->assertOk()->assertSee('Booking melalui WhatsApp');
+        $this->post('/classes/'.$session->id.'/join')->assertForbidden();
+        $this->assertDatabaseCount('class_enrollments', 0);
         $this->get('/admin/classes/new')->assertForbidden();
     }
 }

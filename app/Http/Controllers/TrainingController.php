@@ -10,6 +10,7 @@ use App\Models\TrainerProfile;
 use App\Models\TrainingSession;
 use App\Services\MembershipService;
 use App\Services\TrainingService;
+use App\Services\WhatsAppService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -28,6 +29,7 @@ class TrainingController extends Controller
             $query->whereHas('trainer', fn ($q) => $q->where('user_id', $request->user()->id));
         }
         if ($request->user()->role === 'member') {
+            $query->where(fn ($q) => $q->where('kind', 'group')->orWhereHas('enrollments', fn ($e) => $e->whereHas('member', fn ($m) => $m->where('user_id', $request->user()->id))->where('status', '!=', 'cancelled')));
             if ($request->boolean('mine')) {
                 $query->whereHas('enrollments', fn ($q) => $q->whereHas('member', fn ($m) => $m->where('user_id', $request->user()->id))->where('status', '!=', 'cancelled'));
             } else {
@@ -44,11 +46,12 @@ class TrainingController extends Controller
             $query->where('starts_at', '>=', $start->utc())->where('starts_at', '<', $start->addDay()->utc());
         }
 
-        return view('gym.classes', ['sessions' => $query->orderBy('starts_at')->paginate(12)->withQueryString(), 'rooms' => $request->user()->role === 'owner' ? StudioRoom::orderBy('name')->get() : collect(), 'member' => $request->user()->role === 'member' ? $request->user()->member()->firstOrFail() : null]);
+        return view('gym.classes', ['sessions' => $query->orderBy('starts_at')->paginate(12)->withQueryString(), 'rooms' => $request->user()->role === 'owner' ? StudioRoom::orderBy('name')->get() : collect(), 'bookingUrl' => $request->user()->role === 'member' ? app(WhatsAppService::class)->getBookingUrl($request->user()->member()->firstOrFail(), $request->input('activity')) : null, 'member' => $request->user()->role === 'member' ? $request->user()->member()->firstOrFail() : null]);
     }
 
     public function create(Request $request): View
     {
+        abort_unless($request->user()->hasPermission('schedule.manage'), 403);
         if ($request->filled('source')) {
             $request->validate(['source' => 'required|uuid|exists:training_sessions,id']);
             $original = TrainingSession::findOrFail($request->input('source'));
@@ -65,6 +68,7 @@ class TrainingController extends Controller
 
     public function edit(Request $request, TrainingSession $session): View
     {
+        abort_unless($request->user()->hasPermission('schedule.manage'), 403);
         $this->authorizeSession($request, $session);
 
         return $this->form($session);
@@ -84,6 +88,7 @@ class TrainingController extends Controller
 
     public function update(TrainingSessionRequest $request, TrainingSession $session, TrainingService $service): RedirectResponse
     {
+        abort_unless($request->user()->hasPermission('schedule.manage'), 403);
         $this->authorizeSession($request, $session);
         $service->save($request->validated(), $request->user(), $session);
 
@@ -94,6 +99,9 @@ class TrainingController extends Controller
     {
         if ($request->user()->role === 'personal_trainer') {
             abort_unless($session->trainer->user_id === $request->user()->id, 403);
+            if ($session->kind === 'personal' && $session->enrollments()->where('status', '!=', 'cancelled')->exists()) {
+                abort_unless($session->enrollments()->where('status', '!=', 'cancelled')->whereHas('member.trainerAssignments', fn ($q) => $q->active()->where('activity', $session->activity)->where('trainer_profile_id', $session->trainer_profile_id))->exists(), 403);
+            }
         }
     }
 
@@ -102,23 +110,24 @@ class TrainingController extends Controller
         $this->authorizeSession($request, $session);
         $memberView = $request->user()->role === 'member';
         if ($memberView) {
+            if ($session->kind === 'personal') {
+                abort_unless($session->enrollments()->whereHas('member', fn ($q) => $q->where('user_id', $request->user()->id))->where('status', '!=', 'cancelled')->exists(), 404);
+            }
             abort_unless($session->status === 'scheduled' || $session->enrollments()->whereHas('member', fn ($q) => $q->where('user_id', $request->user()->id))->exists(), 404);
         }
         $enrollments = $session->enrollments()->with('member')->when($memberView, fn ($q) => $q->whereHas('member', fn ($m) => $m->where('user_id', $request->user()->id)))->orderBy('created_at')->get();
 
-        return view('gym.class-detail', ['session' => $session->load('trainer.user', 'room'), 'enrollments' => $enrollments, 'member' => $memberView ? $request->user()->member()->firstOrFail() : null, 'members' => in_array($request->user()->role, ['owner', 'receptionist'], true) ? Member::where('status', 'active')->orderBy('full_name')->get() : collect()]);
+        return view('gym.class-detail', ['session' => $session->load('trainer.user', 'room'), 'enrollments' => $enrollments, 'bookingUrl' => $memberView ? app(WhatsAppService::class)->getBookingUrl($request->user()->member()->firstOrFail(), $session->activity) : null, 'member' => $memberView ? $request->user()->member()->firstOrFail() : null, 'members' => in_array($request->user()->role, ['owner', 'receptionist'], true) ? Member::where('status', 'active')->orderBy('full_name')->get() : collect()]);
     }
 
-    public function join(Request $request, TrainingSession $session, TrainingService $service): RedirectResponse
+    public function join(): never
     {
-        $service->enroll($session, $request->user()->member()->firstOrFail(), $request->user());
-
-        return back()->with('success', 'Anda terdaftar. Jadwal tersedia di Kelas saya.');
+        abort(403, 'Booking dilakukan melalui WhatsApp dan dikonfirmasi oleh staf.');
     }
 
     public function enroll(Request $request, TrainingSession $session, TrainingService $service): RedirectResponse
     {
-        $data = $request->validate(['member_id' => 'required|uuid|exists:members,id']);
+        $data = $request->validate(['member_id' => 'required|uuid|exists:members,id', 'wa_confirmed' => 'required|accepted']);
         $service->enroll($session, Member::findOrFail($data['member_id']), $request->user());
 
         return back()->with('success', 'Peserta terdaftar.');

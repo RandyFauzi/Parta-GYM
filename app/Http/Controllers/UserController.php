@@ -57,9 +57,10 @@ class UserController extends Controller
             User::where('role', 'owner')->orderBy('id')->lockForUpdate()->get();
             $user = new User;
             $data = $request->validated();
-            $user->forceFill([...array_intersect_key($data, array_flip(['name', 'email', 'role', 'is_active', 'password'])), 'remember_token' => Str::random(60)])->save();
+            $data['permissions'] = $data['role'] === 'receptionist' ? ($data['permissions'] ?? ['booking.manage']) : [];
+            $user->forceFill([...array_intersect_key($data, array_flip(['name', 'email', 'role', 'is_active', 'password', 'permissions'])), 'remember_token' => Str::random(60)])->save();
             $this->linkProfiles($user, $data);
-            $service->audit('user.created', (string) $user->id, ['role' => $user->role]);
+            $service->audit('user.created', (string) $user->id, ['role' => $user->role, 'permissions' => $user->permissions]);
 
             return $user;
         });
@@ -73,6 +74,7 @@ class UserController extends Controller
             $owners = User::where('role', 'owner')->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
             $account = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $data = $request->validated();
+            $data['permissions'] = $data['role'] === 'receptionist' ? ($data['permissions'] ?? ($account->role === 'receptionist' ? ($account->permissions ?? ['booking.manage']) : ['booking.manage'])) : [];
             $losingAccess = $data['role'] !== $account->role || ! (bool) $data['is_active'];
             if ($request->user()->is($account) && $losingAccess) {
                 throw ValidationException::withMessages(['role' => 'Anda tidak dapat menghapus atau menurunkan akses akun sendiri.']);
@@ -83,14 +85,14 @@ class UserController extends Controller
             if ($losingAccess) {
                 $this->ensureNoOpenShift($account);
             }
-            $securityChanged = $account->role !== $data['role'] || $account->email !== $data['email'] || $account->is_active !== (bool) $data['is_active'] || ! empty($data['password']);
+            $securityChanged = $account->permissions !== $data['permissions'] || $account->role !== $data['role'] || $account->email !== $data['email'] || $account->is_active !== (bool) $data['is_active'] || ! empty($data['password']);
             if (empty($data['password'])) {
                 unset($data['password']);
             }
             if ($account->email !== $data['email']) {
                 $account->email_verified_at = null;
             }
-            $account->forceFill(array_intersect_key($data, array_flip(['name', 'email', 'role', 'is_active', 'password'])))->save();
+            $account->forceFill(array_intersect_key($data, array_flip(['name', 'email', 'role', 'is_active', 'password', 'permissions'])))->save();
             $this->linkProfiles($account, $data);
             if ($securityChanged) {
                 $account->forceFill(['remember_token' => Str::random(60)])->save();
@@ -100,7 +102,7 @@ class UserController extends Controller
                 }
                 $sessions->delete();
             }
-            $service->audit('user.updated', (string) $account->id, ['role' => $account->role, 'is_active' => $account->is_active, 'password_reset' => ! empty($data['password'])]);
+            $service->audit('user.updated', (string) $account->id, ['permissions' => $account->permissions, 'role' => $account->role, 'is_active' => $account->is_active, 'password_reset' => ! empty($data['password'])]);
         });
 
         return redirect()->route('users.show', $user)->with('success', 'Akun diperbarui. Perubahan akses membatalkan sesi lama.');

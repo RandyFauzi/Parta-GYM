@@ -3,6 +3,12 @@
 return [
     'name' => env('GYM_NAME', 'SPARTA Gym & Pilates'),
     'timezone' => env('GYM_TIMEZONE', 'Asia/Makassar'),
+    'booking_whatsapp' => env('GYM_BOOKING_WHATSAPP'),
+    'staff_permissions' => [
+        'booking.manage' => 'Konfirmasi dan batalkan booking WA',
+        'schedule.manage' => 'Kelola jadwal dan penugasan sesi',
+        'assignments.manage' => 'Tetapkan dan ganti PT member',
+    ],
     'currency' => 'IDR',
     'account_roles' => ['owner' => 'Owner / Superadmin', 'receptionist' => 'Resepsionis', 'personal_trainer' => 'Personal Trainer', 'member' => 'Member'],
     'payment_methods' => ['cash' => 'Tunai', 'bank_transfer' => 'Transfer bank', 'qris' => 'QRIS', 'card' => 'Kartu / EDC', 'other' => 'Lainnya'],

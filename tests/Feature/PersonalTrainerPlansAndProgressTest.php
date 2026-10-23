@@ -6,6 +6,7 @@ use App\Models\ClassEnrollment;
 use App\Models\Member;
 use App\Models\MemberProgressRecord;
 use App\Models\MembershipPlan;
+use App\Models\TrainerAssignment;
 use App\Models\TrainerProfile;
 use App\Models\TrainingSession;
 use App\Models\User;
@@ -126,6 +127,7 @@ class PersonalTrainerPlansAndProgressTest extends TestCase
         $session = TrainingSession::factory()->create(['trainer_profile_id' => $trainerUser->trainerProfile->id]);
         ClassEnrollment::factory()->create(['training_session_id' => $session->id, 'member_id' => $member->id]);
 
+        TrainerAssignment::factory()->create(['member_id' => $member->id, 'trainer_profile_id' => $trainerUser->trainerProfile->id, 'activity' => $session->activity]);
         $this->actingAs($trainerUser);
 
         $response = $this->post("/admin/members/{$member->id}/progress", [

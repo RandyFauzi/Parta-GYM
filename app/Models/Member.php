@@ -51,12 +51,12 @@ class Member extends Model
 
     public function periods(): HasMany
     {
-        return $this->hasMany(MembershipPeriod::class)->withCount(['classEnrollments as reserved_sessions' => fn ($query) => $query->where('status', 'confirmed'), 'classEnrollments as used_sessions' => fn ($query) => $query->whereIn('status', ['attended', 'no_show'])]);
+        return $this->hasMany(MembershipPeriod::class)->with('entitlements')->withCount(['classEnrollments as reserved_sessions' => fn ($query) => $query->where('status', 'confirmed'), 'classEnrollments as used_sessions' => fn ($query) => $query->whereIn('status', ['attended', 'no_show'])]);
     }
 
     public function currentPeriod(): HasOne
     {
-        return $this->hasOne(MembershipPeriod::class)->whereIn('plan_type', ['gym', 'all_access'])->where('status', 'active')->where('starts_at', '<=', now())->where('ends_at', '>', now())->latest('ends_at');
+        return $this->hasOne(MembershipPeriod::class)->where(fn ($q) => $q->whereHas('entitlements', fn ($e) => $e->where('benefit_key', 'gym_access'))->orWhere(fn ($legacy) => $legacy->whereDoesntHave('entitlements')->whereIn('plan_type', ['gym', 'all_access'])))->where('status', 'active')->where('starts_at', '<=', now())->where('ends_at', '>', now())->latest('ends_at');
     }
 
     public function invoices(): HasMany
@@ -74,9 +74,15 @@ class Member extends Model
         return $this->hasMany(ClassEnrollment::class);
     }
 
-    public function isCoachedBy(User $trainer): bool
+    public function trainerAssignments(): HasMany
     {
-        return $this->trainingEnrollments()->whereIn('status', ['confirmed', 'attended', 'no_show'])->whereHas('session.trainer', fn ($query) => $query->where('user_id', $trainer->id))->exists();
+        return $this->hasMany(TrainerAssignment::class);
+    }
+
+    public function isCoachedBy(User $trainer, ?string $activity = null): bool
+    {
+        return $trainer->is_active && ! $trainer->trashed() && $trainer->role === 'personal_trainer' &&
+            $this->trainerAssignments()->active()->when($activity, fn ($query) => $query->where('activity', $activity))->whereHas('trainer', fn ($query) => $query->where('user_id', $trainer->id))->exists();
     }
 
     public function progressRecords(): HasMany

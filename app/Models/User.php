@@ -21,6 +21,18 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
+    public function hasPermission(string $permission): bool
+    {
+        if (! $this->is_active || $this->trashed() || ! array_key_exists($permission, config('gym.staff_permissions'))) {
+            return false;
+        }
+        if ($this->role === 'owner') {
+            return array_key_exists($permission, config('gym.staff_permissions'));
+        }
+
+        return $this->role === 'receptionist' && in_array($permission, $this->permissions ?? ['booking.manage'], true);
+    }
+
     public function member(): HasOne
     {
         return $this->hasOne(Member::class);
@@ -56,6 +68,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'permissions' => 'array',
         ];
     }
 }

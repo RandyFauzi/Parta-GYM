@@ -10,6 +10,7 @@ use App\Models\Member;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
 use App\Models\StaffShift;
+use App\Models\TrainerProfile;
 use App\Models\User;
 use App\Services\MembershipService;
 use App\Services\WhatsAppService;
@@ -168,6 +169,8 @@ class GymController extends Controller
     {
         return view('gym.member', [
             'member' => $member->load('currentPeriod.invoice', 'periods.invoice', 'progressRecords.trainer', 'progressRecords.session'),
+            'trainers' => TrainerProfile::with('user')->whereHas('user', fn ($q) => $q->where('role', 'personal_trainer')->where('is_active', true))->get(),
+            'assignments' => $member->trainerAssignments()->with('trainer.user')->latest()->get(),
             'plans' => MembershipPlan::where('is_active', true)->get(),
             'invoices' => $member->invoices()->latest()->get(),
             'visits' => $member->checkins()->latest('checked_in_at')->limit(20)->get(),

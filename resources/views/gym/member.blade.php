@@ -53,7 +53,7 @@
 
     <section class="panel form-panel">
         <h2>Beli / perpanjang paket</h2>
-        <p class="muted">Sisa masa aktif tetap tersimpan. Paket berikutnya dimulai setelah periode terakhir.</p>
+        <p class="muted">Perpanjangan kategori dan susunan manfaat yang sama dimulai setelah periode terakhir. Paket dengan manfaat berbeda dapat berjalan bersamaan.</p>
         <form action="{{ route('invoices.store',$member) }}" method="post">
             @csrf
             <input type="hidden" name="request_key" value="{{ (string)Illuminate\Support\Str::uuid() }}">
@@ -178,5 +178,6 @@
     </details>
 @endif
 
+@include('gym.trainer-assignments')
 @include('gym.periods')
 @endsection

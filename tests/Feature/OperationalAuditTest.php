@@ -8,6 +8,7 @@ use App\Models\MemberProgressRecord;
 use App\Models\MembershipPeriod;
 use App\Models\MembershipPlan;
 use App\Models\StaffAttendance;
+use App\Models\TrainerAssignment;
 use App\Models\TrainerProfile;
 use App\Models\TrainingSession;
 use App\Models\User;
@@ -52,15 +53,16 @@ class OperationalAuditTest extends TestCase
         $period = $this->buy($member, 'pt', 1);
         $owner = auth()->user();
         $session = TrainingSession::factory()->create(['kind' => 'personal', 'capacity' => 1]);
+        TrainerAssignment::factory()->create(['member_id' => $member->id, 'trainer_profile_id' => $session->trainer_profile_id, 'activity' => $session->activity]);
         $service = app(TrainingService::class);
         $service->enroll($session, $member, $owner);
         $service->enroll($session, $member, $owner);
         $this->assertDatabaseHas('class_enrollments', ['membership_period_id' => $period->id, 'member_id' => $member->id]);
         $this->assertDatabaseCount('class_enrollments', 1);
-        $next = TrainingSession::factory()->create(['kind' => 'personal', 'capacity' => 1, 'starts_at' => now()->addDays(2), 'ends_at' => now()->addDays(2)->addHour()]);
-        $this->post(route('classes.enroll', $next), ['member_id' => $member->id])->assertSessionHasErrors('member_id');
+        $next = TrainingSession::factory()->create(['kind' => 'personal', 'capacity' => 1, 'trainer_profile_id' => $session->trainer_profile_id, 'starts_at' => now()->addDays(2), 'ends_at' => now()->addDays(2)->addHour()]);
+        $this->post(route('classes.enroll', $next), ['member_id' => $member->id, 'wa_confirmed' => 1])->assertSessionHasErrors('member_id');
         $service->close($session, 'cancelled', 'Studio maintenance', $owner);
-        $this->post(route('classes.enroll', $next), ['member_id' => $member->id])->assertSessionHasNoErrors();
+        $this->post(route('classes.enroll', $next), ['member_id' => $member->id, 'wa_confirmed' => 1])->assertSessionHasNoErrors();
     }
 
     public function test_expired_pt_package_cannot_book_a_future_session(): void
@@ -68,7 +70,7 @@ class OperationalAuditTest extends TestCase
         $member = Member::factory()->create();
         $period = $this->buy($member, 'pt', 10);
         $session = TrainingSession::factory()->create(['kind' => 'personal', 'capacity' => 1, 'starts_at' => $period->ends_at->addDay(), 'ends_at' => $period->ends_at->addDay()->addHour()]);
-        $this->post(route('classes.enroll', $session), ['member_id' => $member->id])->assertSessionHasErrors('member_id');
+        $this->post(route('classes.enroll', $session), ['member_id' => $member->id, 'wa_confirmed' => 1])->assertSessionHasErrors('member_id');
         $this->assertDatabaseCount('class_enrollments', 0);
     }
 
@@ -83,6 +85,8 @@ class OperationalAuditTest extends TestCase
         $this->get(route('coaching.member', $member))->assertForbidden();
         $session = TrainingSession::factory()->create(['trainer_profile_id' => $trainer->id]);
         ClassEnrollment::factory()->create(['member_id' => $member->id, 'training_session_id' => $session->id]);
+        $this->get(route('coaching.member', $member))->assertForbidden();
+        TrainerAssignment::factory()->create(['member_id' => $member->id, 'trainer_profile_id' => $trainer->id, 'activity' => $session->activity]);
         $this->get(route('coaching.member', $member))->assertOk()->assertSee('Confidential report');
         $this->actingAs(User::factory()->create(['role' => 'receptionist']))->get(route('members.progress.show', [$member, $record]))->assertForbidden();
     }
