@@ -1,5 +1,5 @@
-@props(['member'])
-@php($period=$member->currentPeriod)
+@props(['member', 'activityPeriod' => null])
+@php($period=$activityPeriod ?? $member->currentPeriod)
 <section class="m-pass" aria-label="Kartu anggota">
     <div class="m-pass-top"><span>SPARTA Gym &amp; Pilates <span class="m-pass-divider">/</span> MEMBER CARD</span><x-status :status="$member->status==='suspended'?'suspended':($period?'active':'expired')"/></div>
     <div class="m-pass-emblem"><x-icon name="gym"/></div>

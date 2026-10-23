@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:member')->group(function () {
         Route::get('/member/check-in', [MemberPortalController::class, 'card'])->name('portal.card');
         Route::get('/member', [MemberPortalController::class, 'home'])->name('portal');
+        Route::post('/member/activity', [MemberPortalController::class, 'switchActivity'])->name('portal.activity');
         Route::get('/member/membership', [MemberPortalController::class, 'membership'])->name('portal.membership');
         Route::get('/member/visits', [MemberPortalController::class, 'visits'])->name('portal.visits');
         Route::get('/member/payments', [MemberPortalController::class, 'payments'])->name('portal.payments');

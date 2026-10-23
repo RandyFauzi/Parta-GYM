@@ -7,9 +7,11 @@ use App\Models\Invoice;
 use App\Models\Member;
 use App\Models\MembershipPlan;
 use App\Models\Payment;
+use App\Services\MemberDashboardService;
 use App\Services\MemberProgressService;
 use App\Services\MemberQrCode;
 use App\Services\MembershipService;
+use App\Services\WhatsAppService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -25,9 +27,14 @@ class MemberPortalController extends Controller
         return Member::with('currentPeriod.invoice')->where('user_id', $request->user()->id)->firstOrFail();
     }
 
-    public function home(Request $request): View
+    public function home(Request $request, MemberDashboardService $dashboard): View
     {
         $member = $this->member($request);
+        $request->validate(['activity' => 'nullable|in:gym,pilates']);
+        $allBenefits = $dashboard->activeBenefits($member);
+        $dashboardActivity = $dashboard->selectedActivity($member, $request->input('activity', $request->session()->get('portal.activity.'.$member->id)), $allBenefits);
+        $benefits = $dashboard->forActivity($allBenefits, $dashboardActivity);
+        $activityPeriod = $benefits->first()['period'] ?? null;
         $today = CarbonImmutable::now(config('gym.timezone'))->startOfDay();
         $week = $member->checkins()->where('checked_in_at', '>=', $today->subDays(6)->utc())->where('checked_in_at', '<', $today->addDay()->utc())->get(['checked_in_at']);
         $byDay = $week->groupBy(fn ($visit) => $visit->checked_in_at->timezone(config('gym.timezone'))->format('Y-m-d'));
@@ -37,14 +44,46 @@ class MemberPortalController extends Controller
             $activity[] = ['label' => $day->locale('id')->isoFormat('ddd'), 'date' => $day->format('d M'), 'count' => $byDay->get($day->format('Y-m-d'), collect())->count()];
         }
 
-        return view('member.home', compact('member', 'activity') + ['weekVisits' => $week->count(), 'totalVisits' => $member->checkins()->count(), 'latestVisit' => $member->checkins()->latest('checked_in_at')->first(), 'outstanding' => $member->invoices()->where('status', 'unpaid')->sum('total_idr'), 'periodVisits' => $member->currentPeriod ? $member->checkins()->where('membership_period_id', $member->currentPeriod->id)->count() : 0]);
+        $attended = $member->trainingEnrollments()->where('status', 'attended')->whereHas('session', fn ($session) => $session->where('activity', $dashboardActivity));
+        $sessionWeek = (clone $attended)->where('attended_at', '>=', $today->subDays(6)->utc())->where('attended_at', '<', $today->addDay()->utc())->get(['attended_at']);
+        if ($dashboardActivity === 'pilates') {
+            $dates = $sessionWeek->groupBy(fn ($enrollment) => $enrollment->attended_at->timezone(config('gym.timezone'))->format('Y-m-d'));
+            foreach ($activity as $index => &$day) {
+                $day['count'] = $dates->get($today->subDays(6 - $index)->format('Y-m-d'), collect())->count();
+            }
+            unset($day);
+        }
+
+        return view('member.home', compact('member', 'activity', 'dashboardActivity', 'benefits', 'activityPeriod') + [
+            'allBenefits' => $allBenefits,
+            'bookingUrl' => app(WhatsAppService::class)->getBookingUrl($member, $dashboardActivity),
+            'assignments' => $member->trainerAssignments()->active()->where('activity', $dashboardActivity)->whereHas('trainer.user', fn ($user) => $user->where('role', 'personal_trainer')->where('is_active', true))->with('trainer.user')->get(),
+            'upcoming' => $member->trainingEnrollments()->where('class_enrollments.status', 'confirmed')->whereHas('session', fn ($session) => $session->where('activity', $dashboardActivity)->where('status', 'scheduled')->where('ends_at', '>', now()))->with('session.trainer.user', 'session.room')->join('training_sessions', 'training_sessions.id', '=', 'class_enrollments.training_session_id')->select('class_enrollments.*')->orderBy('training_sessions.starts_at')->limit(5)->get(),
+            'weekVisits' => $dashboardActivity === 'gym' ? $week->count() : $sessionWeek->count(),
+            'totalVisits' => $dashboardActivity === 'gym' ? $member->checkins()->count() : (clone $attended)->count(),
+            'latestActivityAt' => $dashboardActivity === 'gym' ? $member->checkins()->latest('checked_in_at')->first()?->checked_in_at : (clone $attended)->whereNotNull('attended_at')->latest('attended_at')->first()?->attended_at,
+            'outstanding' => $member->invoices()->where('status', 'unpaid')->sum('total_idr'),
+        ]);
     }
 
-    public function membership(Request $request): View
+    public function membership(Request $request, MemberDashboardService $dashboard): View
     {
         $member = $this->member($request);
+        $request->validate(['activity' => 'nullable|in:gym,pilates']);
+        $allBenefits = $dashboard->activeBenefits($member);
+        $dashboardActivity = $dashboard->selectedActivity($member, $request->input('activity', $request->session()->get('portal.activity.'.$member->id)), $allBenefits);
+        $benefits = $dashboard->forActivity($allBenefits, $dashboardActivity);
 
-        return view('member.membership', ['member' => $member, 'plans' => MembershipPlan::where('is_active', true)->orderBy('price_idr')->get(), 'periods' => $member->periods()->with('invoice')->latest('starts_at')->paginate(8), 'periodVisits' => $member->currentPeriod ? $member->checkins()->where('membership_period_id', $member->currentPeriod->id)->count() : 0]);
+        return view('member.membership', compact('member', 'dashboardActivity', 'benefits') + ['activityPeriod' => $benefits->first()['period'] ?? null, 'plans' => MembershipPlan::where('is_active', true)->orderBy('price_idr')->get()->filter(fn (MembershipPlan $plan) => collect($plan->benefit_definitions)->keys()->contains(fn (string $key) => $dashboard->matches($key, $dashboardActivity))), 'periods' => $member->periods()->with('invoice')->latest('starts_at')->paginate(8)]);
+    }
+
+    public function switchActivity(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['activity' => 'required|in:gym,pilates']);
+        $member = $this->member($request);
+        $request->session()->put('portal.activity.'.$member->id, $data['activity']);
+
+        return redirect()->route('portal', ['activity' => $data['activity']]);
     }
 
     public function visits(Request $request): View

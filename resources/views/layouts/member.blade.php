@@ -9,6 +9,7 @@
 </head>
 <body class="member-theme member-app">
 @php
+    $selectedActivity = $dashboardActivity ?? app(\App\Services\MemberDashboardService::class)->selectedActivity($member, request('activity', session('portal.activity.'.$member->id)));
     $navigation = [['portal','grid','Beranda'],['portal.membership','card','Membership'],['portal.card','scan','Check-in'],['portal.payments','layers','Tagihan'],['portal.account','users','Profil']];
     $currentRoute = request()->routeIs('portal.invoice') ? 'portal.payments' : request()->route()->getName();
 @endphp
@@ -19,11 +20,11 @@
     <div class="m-gym-label"><span class="online-dot"></span>{{ config('gym.name') }}</div>
     <nav aria-label="Navigasi anggota desktop">
         @foreach($navigation as [$route,$icon,$label])
-        <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><x-icon :name="$icon"/><span>{{ $label }}</span></a>
+        <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route, in_array($route, ['portal', 'portal.membership', 'classes'], true) ? ['activity' => $selectedActivity] : []) }}" @if($currentRoute===$route) aria-current="page" @endif><x-icon :name="$icon"/><span>{{ $label }}</span></a>
         @endforeach
-        <a href="{{ route('portal.progress') }}" @if(request()->routeIs('portal.progress')) aria-current="page" @endif><x-icon name="chart"/><span>Progres PT</span></a>
+        <a href="{{ route('portal.progress', ['activity' => $selectedActivity]) }}" @if(request()->routeIs('portal.progress')) aria-current="page" @endif><x-icon name="chart"/><span>Progres PT</span></a>
         <a href="{{ route('portal.visits') }}" @if(request()->routeIs('portal.visits')) aria-current="page" @endif><x-icon name="scan"/><span>Kunjungan</span></a>
-        <a href="{{ route('classes') }}" @if(request()->routeIs('classes','classes.*')) aria-current="page" @endif><x-icon name="layers"/><span>Kelas</span></a>
+        <a href="{{ route('classes', ['activity' => $selectedActivity]) }}" @if(request()->routeIs('classes','classes.*')) aria-current="page" @endif><x-icon name="layers"/><span>Kelas</span></a>
     </nav>
     <div class="m-rail-note"><x-icon name="gym"/><p>Informasi gym Anda,<br>dalam satu tempat.</p></div>
     <form action="{{ route('logout') }}" method="post">@csrf<button class="m-logout" aria-label="Keluar akun"><x-icon name="logout"/>Keluar akun</button></form>
@@ -35,6 +36,7 @@
         <div class="m-header-user"><span class="m-header-gym">{{ config('gym.name') }}</span><a class="m-avatar" href="{{ route('portal.account') }}" aria-label="Buka profil">{{ mb_substr($member->full_name,0,1) }}</a></div>
     </header>
     <main class="member-main" id="main">
+        @include('member.activity-switch')
         @if(session('success'))<div class="alert success" role="status"><x-icon name="check"/>{{ session('success') }}</div>@endif
         @if($errors->any())<div class="alert error" role="alert" tabindex="-1" data-error-summary><strong>Periksa data Anda.</strong><ul>@foreach($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul></div>@endif
         @yield('content')
@@ -43,7 +45,7 @@
 </div>
 <nav class="member-dock" aria-label="Navigasi anggota mobile" data-mobile-nav>
     @foreach([['portal','grid','Beranda'],['portal.membership','card','Paket'],['portal.card','scan','Check-in'],['classes','layers','Kelas'],['portal.account','users','Profil']] as [$route,$icon,$label])
-    <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route) }}" @if($currentRoute===$route) aria-current="page" @endif><span class="m-dock-icon"><x-icon :name="$icon"/></span><span>{{ $route==='portal.membership'?'Paket':$label }}</span></a>
+    <a class="{{ $route==='portal.card'?'member-dock-featured':'' }}" href="{{ route($route, in_array($route, ['portal', 'portal.membership', 'classes'], true) ? ['activity' => $selectedActivity] : []) }}" @if($currentRoute===$route) aria-current="page" @endif><span class="m-dock-icon"><x-icon :name="$icon"/></span><span>{{ $route==='portal.membership'?'Paket':$label }}</span></a>
     @endforeach
 </nav>
 </body>

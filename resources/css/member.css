@@ -432,3 +432,34 @@
  .m-invoice-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media print { .member-rail { display: none; } .member-shell { margin-left: 0; } }
+
+/* Shared activity context and independent package benefits. */
+.m-activity-context { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--m-line); }
+.m-activity-context p { color: var(--ink); font-weight: 600; margin-top: 3px; }
+.m-activity-switch { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--m-line); border-radius: 12px; background: var(--m-surface); }
+.m-activity-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 106px; padding: 10px 18px; border: 1px solid transparent; border-radius: 8px; color: var(--muted); background: transparent; font: inherit; cursor: pointer; }
+.m-activity-switch button[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,.08); font-weight: 600; }
+.m-activity-switch button:hover { color: var(--ink); }
+.m-activity-switch svg { width: 18px; height: 18px; }
+.m-benefits, .m-upcoming { margin-top: 24px; }
+.m-benefit-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); gap: 16px; }
+.m-benefit-card { min-width: 0; padding: 18px; border: 1px solid var(--m-line); border-radius: 14px; }
+.m-benefit-heading { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.m-benefit-card .m-detail-list dd { text-align: right; }
+.m-benefit-card .m-detail-list > div { gap: 16px; }
+.m-upcoming-row { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--m-line); }
+.m-upcoming-row h3 a { text-decoration: underline; text-underline-offset: 4px; }
+.m-upcoming-row small { display: block; color: var(--muted); margin-top: 6px; }
+.m-booking-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.m-hero-pilates { background: radial-gradient(ellipse at 95% 20%,rgba(132,146,177,.3),transparent 65%),var(--m-surface); border-color: var(--m-line); }
+.m-hero-pilates::before { background: linear-gradient(90deg,rgba(9,9,10,.7),transparent); }
+.m-pilates-emblem { position: absolute; right: -24px; bottom: -12px; opacity: .12; z-index: -1; transform: rotate(-15deg); }
+.m-pilates-emblem svg { width: 280px; height: 280px; stroke-width: .6; }
+@media (max-width: 639px) {
+ .m-activity-context { align-items: stretch; gap: 12px; }
+ .m-activity-context > div, .m-activity-switch { width: 100%; }
+ .m-activity-switch button { flex: 1; }
+ .m-booking-actions > .button { width: 100%; }
+ .m-upcoming-row { gap: 10px; }
+}
+@media print { .m-activity-context, .m-booking-actions { display: none; } }
