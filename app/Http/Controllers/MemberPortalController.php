@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class MemberPortalController extends Controller
 {
@@ -139,7 +140,10 @@ class MemberPortalController extends Controller
 
     public function renewal(Request $request, MembershipService $service): RedirectResponse
     {
-        $data = $request->validate(['plan_id' => 'required|uuid|exists:membership_plans,id', 'request_key' => 'required|uuid']);
+        $data = $request->validate([
+            'plan_id' => ['required', 'uuid', Rule::exists('membership_plans', 'id')->where('is_active', true)],
+            'request_key' => 'required|uuid',
+        ]);
         $invoice = $service->createInvoice($this->member($request), MembershipPlan::findOrFail($data['plan_id']), $data['request_key']);
 
         return redirect()->route('portal.invoice', $invoice)->with('success', 'Invoice paket dibuat. Selesaikan pembayaran di front desk untuk mengaktifkannya.');

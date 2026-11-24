@@ -20,8 +20,6 @@ $todayAtt = auth()->user()->todayAttendance;
 <a class="button compact" href="{{ route('staff.attendance.me') }}">Foto Clock In</a>
 @elseif(!$todayAtt->clock_out_at)
 <a class="button compact secondary" href="{{ route('staff.attendance.me') }}">Foto Clock Out</a>
-@elseif(!$todayAtt->clock_out_at)
-<form action="{{ route('staff.clock-out') }}" method="post" style="margin:0;display:flex;align-items:center;gap:6px;">@csrf<span class="badge positive" style="font-size:0.75rem;">In: {{ $todayAtt->clock_in_at->timezone(config('gym.timezone'))->format('H:i') }}</span><button class="button compact secondary" title="Catat jam kepulangan hari ini">Clock Out</button></form>
 @else
 <span class="badge neutral" style="font-size:0.75rem;">Absen: Selesai</span>
 @endif

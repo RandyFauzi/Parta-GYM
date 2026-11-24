@@ -197,4 +197,29 @@ class GymWorkflowTest extends TestCase
         $this->actingAs($this->staff())->post('/admin/membership-plans', ['name' => 'Bad', 'duration_unit' => 'month', 'duration_value' => 1, 'price_idr' => -1, 'is_active' => 1])->assertSessionHasErrors('price_idr');
         $this->actingAs($this->staff('receptionist'))->post('/admin/membership-plans', [])->assertForbidden();
     }
+
+    public function test_payments_search_by_member_number_and_inactive_plans_cannot_be_invoiced(): void
+    {
+        $staff = $this->staff();
+        $this->actingAs($staff);
+        $invoice = $this->purchase();
+        $member = $invoice->member;
+
+        $this->get('/payments?q='.urlencode($member->member_number))
+            ->assertOk()
+            ->assertSee($invoice->invoice_number);
+
+        $inactivePlan = MembershipPlan::factory()->create(['is_active' => false]);
+        $this->post('/members/'.$member->id.'/invoices', [
+            'plan_id' => $inactivePlan->id,
+            'request_key' => (string) Str::uuid(),
+        ])->assertSessionHasErrors('plan_id');
+
+        $memberUser = User::factory()->create(['role' => 'member']);
+        $member->update(['user_id' => $memberUser->id]);
+        $this->actingAs($memberUser)->post('/member/renewals', [
+            'plan_id' => $inactivePlan->id,
+            'request_key' => (string) Str::uuid(),
+        ])->assertSessionHasErrors('plan_id');
+    }
 }

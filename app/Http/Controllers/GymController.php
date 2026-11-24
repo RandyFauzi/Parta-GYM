@@ -22,6 +22,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -191,7 +192,10 @@ class GymController extends Controller
 
     public function invoice(Request $r, Member $member): RedirectResponse
     {
-        $data = $r->validate(['plan_id' => 'required|uuid|exists:membership_plans,id', 'request_key' => 'required|uuid']);
+        $data = $r->validate([
+            'plan_id' => ['required', 'uuid', Rule::exists('membership_plans', 'id')->where('is_active', true)],
+            'request_key' => 'required|uuid',
+        ]);
         $this->service->createInvoice($member, MembershipPlan::findOrFail($data['plan_id']), $data['request_key']);
 
         return back()->with('success', 'Invoice dibuat. Keanggotaan aktif setelah pembayaran dikonfirmasi.');
@@ -199,6 +203,11 @@ class GymController extends Controller
 
     public function payments(Request $r): View
     {
+        $r->validate([
+            'status' => 'nullable|in:all,paid,unpaid',
+            'q' => 'nullable|string|max:100',
+        ]);
+
         $query = Invoice::with('member', 'payment')->latest();
 
         if ($r->filled('status') && in_array($r->status, ['paid', 'unpaid'], true)) {
@@ -206,13 +215,13 @@ class GymController extends Controller
         }
 
         if ($r->filled('q')) {
-            $search = trim($r->q);
+            $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], trim($r->q)).'%';
             $query->where(function ($q) use ($search) {
-                $q->where('invoice_number', 'like', "%{$search}%")
+                $q->where('invoice_number', 'like', $search)
                     ->orWhereHas('member', function ($mq) use ($search) {
-                        $mq->where('full_name', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%")
-                            ->orWhere('member_code', 'like', "%{$search}%");
+                        $mq->where('full_name', 'like', $search)
+                            ->orWhere('phone', 'like', $search)
+                            ->orWhere('member_number', 'like', $search);
                     });
             });
         }
