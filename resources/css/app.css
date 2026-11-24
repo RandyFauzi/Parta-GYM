@@ -3,24 +3,25 @@
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
 :root  {
- --ink: #FFFFFF;
- --muted: #BABABA;
- --bg: #09090A;
- --surface: #101011;
- --surface-raised: #1B191A;
- --surface-hover: #251A18;
- --border: #453027;
+ --ink: #F8FAFC;
+ --muted: #A1A1AA;
+ --bg: #09090B;
+ --surface: #111114;
+ --surface-raised: #18181D;
+ --surface-hover: #202027;
+ --border: rgba(255, 255, 255, 0.09);
+ --border-strong: rgba(255, 255, 255, 0.16);
  --orange: #FF6D29;
- --orange-hover: #FF7B35;
- --orange-soft: #453027;
- --on-accent: #161316;
- --gold: #FF6D29;
- --gold-soft: #453027;
- --success: #8ed7a2;
- --success-bg: #172a1e;
- --danger: #ffaaa3;
- --danger-bg: #331b1c;
- --radius: 16px;
+ --orange-hover: #FF8144;
+ --orange-soft: rgba(255, 109, 41, 0.14);
+ --on-accent: #140B05;
+ --gold: #FF7A3D;
+ --gold-soft: rgba(255, 122, 61, 0.14);
+ --success: #4ADE80;
+ --success-bg: rgba(74, 222, 128, 0.12);
+ --danger: #FB7185;
+ --danger-bg: rgba(251, 113, 133, 0.12);
+ --radius: 18px;
  --font: 'Instrument Sans', 'Segoe UI', Arial, sans-serif;
  color-scheme: dark;
 }
@@ -1452,3 +1453,130 @@ input[aria-invalid=true]  {
 .parta-logo { display: block; width: 150px; max-width: 100%; height: auto; background: transparent; }
 .login-story .parta-logo { width: 190px; }
 @media (max-width: 639px) { .m-mobile-brand .parta-logo, .workspace-mobile-brand .parta-logo { width: 106px; } }
+
+/* Modern UI elevation layer */
+.topbar {
+ background: rgba(17, 17, 20, 0.8);
+ backdrop-filter: blur(16px);
+ -webkit-backdrop-filter: blur(16px);
+ position: sticky;
+ top: 0;
+ z-index: 20;
+}
+.sidebar nav > a {
+ border: 1px solid transparent;
+ transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.sidebar nav > a:hover {
+ background: rgba(255, 255, 255, 0.04);
+ border-color: rgba(255, 255, 255, 0.06);
+}
+.sidebar nav > a.selected {
+ background: var(--orange-soft);
+ border-color: rgba(255, 109, 41, 0.25);
+ color: var(--orange);
+}
+.panel, .kpi, .result-card, .info-card {
+ background: var(--surface);
+ border: 1px solid var(--border);
+ box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 32px rgba(0, 0, 0, 0.22);
+ transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kpi strong, .money, .chart-total, td.money {
+ font-variant-numeric: tabular-nums;
+}
+.button {
+ background: linear-gradient(135deg, #ff7e3e, #ff5d17);
+ border-color: rgba(255, 130, 67, 0.65);
+ color: #160c05;
+ font-weight: 600;
+ box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 4px 14px rgba(255, 109, 41, 0.2);
+ transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+@media (hover: hover) {
+ .button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 8px 22px rgba(255, 109, 41, 0.28);
+ }
+}
+.button:active { transform: translateY(0) scale(0.99); }
+.button.secondary, .button.ghost {
+ background: rgba(255, 255, 255, 0.045);
+ border: 1px solid rgba(255, 255, 255, 0.11);
+ color: var(--ink);
+ box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+@media (hover: hover) {
+ .button.secondary:hover, .button.ghost:hover {
+  background: rgba(255, 255, 255, 0.085);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+ }
+}
+input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea {
+ background: rgba(255, 255, 255, 0.035);
+ border: 1px solid rgba(255, 255, 255, 0.11);
+ border-radius: 10px;
+ color: var(--ink);
+ transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+input:not([type=checkbox]):not([type=radio]):not([type=file]):hover, select:hover, textarea:hover {
+ border-color: rgba(255, 255, 255, 0.22);
+}
+input:not([type=checkbox]):not([type=radio]):not([type=file]):focus, select:focus, textarea:focus {
+ outline: none;
+ border-color: var(--orange);
+ background: rgba(255, 255, 255, 0.055);
+ box-shadow: 0 0 0 3px rgba(255, 109, 41, 0.18);
+}
+th {
+ font-size: 10px;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ color: var(--muted);
+ border-bottom-color: var(--border);
+}
+td {
+ border-bottom-color: rgba(255, 255, 255, 0.055);
+}
+tbody tr {
+ transition: background-color 0.15s ease;
+}
+@media (hover: hover) {
+ tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+ }
+}
+.badge {
+ border-radius: 999px;
+ border: 1px solid rgba(255, 255, 255, 0.1);
+ font-weight: 600;
+ letter-spacing: 0.02em;
+}
+.badge.positive {
+ border-color: rgba(74, 222, 128, 0.28);
+}
+.badge.pending, .badge.warning {
+ border-color: rgba(251, 191, 36, 0.28);
+}
+.badge.suspended, .badge.danger {
+ border-color: rgba(251, 113, 133, 0.28);
+}
+.bar {
+ background: linear-gradient(180deg, #ff874a 0%, #e65817 100%);
+ border-radius: 6px 6px 0 0;
+ transition: filter 0.18s ease, transform 0.18s ease;
+}
+.bar:hover {
+ filter: brightness(1.12);
+}
+.alert {
+ border-radius: 14px;
+ backdrop-filter: blur(8px);
+}
+@media (prefers-reduced-motion: reduce) {
+ .button, .sidebar nav > a, .panel, .kpi, input, select, textarea, .bar { transition: none; }
+ .button:hover { transform: none; }
+}
