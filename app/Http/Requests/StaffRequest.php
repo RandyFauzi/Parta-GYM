@@ -13,6 +13,6 @@ class StaffRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['name' => 'required|string|max:120', 'email' => 'required|email|max:200|unique:users,email', 'password' => 'required|string|min:12|max:128|confirmed'];
+        return ['name' => 'required|string|max:120', 'email' => 'required|email|max:200|unique:users,email', 'password' => 'required|string|min:8|max:128|confirmed'];
     }
 }

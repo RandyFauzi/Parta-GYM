@@ -112,8 +112,8 @@
                     <input type="checkbox" name="create_account" value="1" @checked(old('create_account'))> Buat akun member dengan email di atas
                 </label>
                 <div data-account-fields>
-                    <x-field name="password" label="Password awal" type="password" autocomplete="new-password" minlength="12"/>
-                    <p class="muted">Minimal 12 karakter. Sampaikan secara pribadi; member dapat menggantinya dari profil.</p>
+                    <x-field name="password" label="Password awal" type="password" autocomplete="new-password" minlength="8"/>
+                    <p class="muted">Minimal 8 karakter. Sampaikan secara pribadi; member dapat menggantinya dari profil.</p>
                 </div>
             </details>
 

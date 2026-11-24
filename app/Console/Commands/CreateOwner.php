@@ -16,8 +16,8 @@ class CreateOwner extends Command
     public function handle(): int
     {
         $email = $this->argument('email');
-        $password = $this->secret('Password (minimum 12 characters)');
-        $validator = Validator::make(['email' => $email, 'password' => $password], ['email' => 'required|email|unique:users,email', 'password' => 'required|string|min:12']);
+        $password = $this->secret('Password (minimum 8 characters)');
+        $validator = Validator::make(['email' => $email, 'password' => $password], ['email' => 'required|email|unique:users,email', 'password' => 'required|string|min:8']);
         if ($validator->fails()) {
             $this->error($validator->errors()->first());
 

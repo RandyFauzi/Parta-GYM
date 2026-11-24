@@ -27,7 +27,7 @@ class UserAccountRequest extends FormRequest
             'email' => ['required', 'email', 'max:200', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'role' => ['required', Rule::in(array_keys(config('gym.account_roles')))],
             'is_active' => 'required|boolean',
-            'password' => [$this->isMethod('post') ? 'required' : 'nullable', 'string', 'min:12', 'max:200', 'confirmed'],
+            'password' => [$this->isMethod('post') ? 'required' : 'nullable', 'string', 'min:8', 'max:200', 'confirmed'],
             'member_id' => ['exclude_unless:role,member', 'required', 'uuid', Rule::exists('members', 'id')],
             'permissions' => 'sometimes|array',
             'permissions.*' => ['string', 'distinct', Rule::in(array_keys(config('gym.staff_permissions')))],

@@ -94,4 +94,24 @@ class UserManagementTest extends TestCase
         $this->post('/login', ['email' => $user->email, 'password' => 'private-pass-123'])->assertSessionHasErrors('email');
         $this->assertGuest();
     }
+
+    public function test_password_allows_eight_characters_without_complexity_rules(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $this->actingAs($owner);
+
+        $this->post('/admin/users', array_merge($this->data(), [
+            'email' => 'shortpass@example.com',
+            'password' => 'abcdefg',
+            'password_confirmation' => 'abcdefg',
+        ]))->assertSessionHasErrors('password');
+
+        $this->post('/admin/users', array_merge($this->data(), [
+            'email' => 'eightchar@example.com',
+            'password' => 'abcdefgh',
+            'password_confirmation' => 'abcdefgh',
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('users', ['email' => 'eightchar@example.com']);
+    }
 }

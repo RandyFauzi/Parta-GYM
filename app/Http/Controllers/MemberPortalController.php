@@ -170,7 +170,7 @@ class MemberPortalController extends Controller
 
     public function password(Request $request, MembershipService $service): RedirectResponse
     {
-        $data = $request->validate(['current_password' => 'required|string|current_password', 'password' => 'required|string|min:12|max:128|confirmed']);
+        $data = $request->validate(['current_password' => 'required|string|current_password', 'password' => 'required|string|min:8|max:128|confirmed']);
         DB::transaction(function () use ($request, $data, $service) {
             $user = $request->user();
             $user->password = $data['password'];

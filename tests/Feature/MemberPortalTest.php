@@ -128,4 +128,24 @@ class MemberPortalTest extends TestCase
         $this->get('/member/membership')->assertForbidden();
         $this->post('/member/renewals', [])->assertForbidden();
     }
+
+    public function test_member_can_change_password_to_eight_characters_without_complexity_rules(): void
+    {
+        $this->account();
+        $user = auth()->user();
+
+        $this->put('/member/password', [
+            'current_password' => 'original-password',
+            'password' => '1234567',
+            'password_confirmation' => '1234567',
+        ])->assertSessionHasErrors('password');
+
+        $this->put('/member/password', [
+            'current_password' => 'original-password',
+            'password' => 'abcdefgh',
+            'password_confirmation' => 'abcdefgh',
+        ])->assertRedirect('/login');
+
+        $this->assertTrue(Hash::check('abcdefgh', $user->fresh()->password));
+    }
 }

@@ -25,8 +25,8 @@ class LinkMemberAccount extends Command
             return self::FAILURE;
         }
         $email = $this->argument('email');
-        $password = $this->secret('Member password (minimum 12 characters)');
-        $validator = Validator::make(['email' => $email, 'password' => $password], ['email' => 'required|email|unique:users,email', 'password' => 'required|string|min:12']);
+        $password = $this->secret('Member password (minimum 8 characters)');
+        $validator = Validator::make(['email' => $email, 'password' => $password], ['email' => 'required|email|unique:users,email', 'password' => 'required|string|min:8']);
         if ($validator->fails()) {
             $this->error($validator->errors()->first());
 

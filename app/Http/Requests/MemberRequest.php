@@ -44,7 +44,7 @@ class MemberRequest extends FormRequest
                 'reference' => 'exclude_unless:payment_status,paid|nullable|required_if:method,bank_transfer,other|string|max:120',
                 'confirmed' => 'exclude_unless:payment_status,paid|required|accepted',
                 'create_account' => 'nullable|boolean',
-                'password' => 'exclude_unless:create_account,1|required|string|min:12|max:200',
+                'password' => 'exclude_unless:create_account,1|required|string|min:8|max:200',
             ];
             if ($this->input('payment_status') === 'paid') {
                 $rules['plan_id'][] = 'required';
